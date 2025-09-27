@@ -58,12 +58,12 @@ export const sidebarData: SidebarData = {
       items: [
         {
           title: 'Patients',
-          url: '/dash/resumes',
+          url: '/workflow',
           icon: IconChecklist,
         },
         {
-          title: 'HL7 Messages',
-          url: '/dash/connections',
+          title: 'Analytics',
+          url: '/workflow/analytics',
           icon: IconUsers,
         },
       ],
