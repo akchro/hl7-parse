@@ -22,19 +22,19 @@ export const sidebarData: SidebarData = {
   },
   teams: [
     {
-      name: 'Resume Team',
+      name: 'Patient Intake',
       logo: Command,
-      plan: 'Basic',
-    },
-    {
-      name: 'Applications Team',
-      logo: GalleryVerticalEnd,
       plan: 'Pro',
     },
     {
-      name: 'Connections Team',
+      name: 'Lab Results',
+      logo: GalleryVerticalEnd, 
+      plan: 'Pro',
+    },
+    {
+      name: 'Medical Records',
       logo: AudioWaveform,
-      plan: 'Pro',
+      plan: 'Basic',
     },
   ],
   navGroups: [
