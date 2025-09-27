@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.database.models import HL7Message, ProcessingLog, PatientData, VisitData, ObservationData, AllergyData
+from app.database.models import HL7Message, ProcessingLog
 from app.models.hl7_models import ProcessingStatus, MessageType
 from app.utils.data_escape import hl7_processor as data_processor
 import logging
