@@ -1,0 +1,80 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+
+# Uploads (will be mounted as volume)
+uploads/*
+!uploads/.gitkeep
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+docs/
+
+# Tests
+tests/
+pytest.ini
+.coverage
+htmlcov/
+
+# Alembic versions (generated during build)
+alembic/versions/
+
+# Backup files
+*.bak
+*.backup
