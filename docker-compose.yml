@@ -1,0 +1,206 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hl7-liteboard-postgres
+    environment:
+      POSTGRES_DB: hl7_liteboard
+      POSTGRES_USER: hl7user
+      POSTGRES_PASSWORD: hl7password
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./fastapi-backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hl7user -d hl7_liteboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hl7-network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./fastapi-backend
+      dockerfile: Dockerfile
+    container_name: hl7-liteboard-backend
+    environment:
+      DATABASE_URL: postgresql://hl7user:hl7password@postgres:5432/hl7_liteboard
+      DEBUG: "True"
+      SECRET_KEY: dev-secret-key-change-in-production
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      MASTRA_ENDPOINT: http://mastra-mock:3001
+      MAX_FILE_SIZE: 10485760
+      PROCESS_TIMEOUT: 300
+      LOG_LEVEL: INFO
+    volumes:
+      - ./fastapi-backend:/app
+      - /app/__pycache__
+      - backend_uploads:/app/uploads
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      sh -c "
+        echo 'Waiting for database...' &&
+        python -c 'import time; time.sleep(10)' &&
+        echo 'Running database migrations...' &&
+        alembic upgrade head &&
+        echo 'Starting FastAPI server...' &&
+        uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+    networks:
+      - hl7-network
+
+  # Mock Mastra Service (for development/testing)
+  mastra-mock:
+    image: node:18-alpine
+    container_name: hl7-liteboard-mastra-mock
+    working_dir: /app
+    command: sh -c "npm install express cors && node server.js"
+    volumes:
+      - ./fastapi-backend/mock-mastra:/app
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      DEBUG: "true"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - hl7-network
+
+  # pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: hl7-liteboard-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@hl7liteboard.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - hl7-network
+
+  # Redis for session storage and caching
+  redis:
+    image: redis:7-alpine
+    container_name: hl7-liteboard-redis
+    command: redis-server --appendonly yes --requirepass hl7redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - hl7-network
+
+  # Frontend (React) - Optional, for future use
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: frontend-production
+    container_name: hl7-liteboard-frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - hl7-network
+    profiles:
+      - frontend  # Only start when frontend profile is specified
+
+  # Monitoring with Prometheus (Optional)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hl7-liteboard-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    networks:
+      - hl7-network
+    profiles:
+      - monitoring  # Only start when monitoring profile is specified
+
+  # Grafana for dashboards (Optional)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: hl7-liteboard-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin123}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    networks:
+      - hl7-network
+    profiles:
+      - monitoring  # Only start when monitoring profile is specified
+
+volumes:
+  postgres_data:
+    driver: local
+  backend_uploads:
+    driver: local
+  pgadmin_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+
+networks:
+  hl7-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
