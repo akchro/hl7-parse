@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as UnauthenticatedIndexRouteImport } from './routes/_unauthenticated/index'
+import { Route as AuthenticatedHl7ConverterRouteImport } from './routes/_authenticated/hl7-converter'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
 import { Route as errors500RouteImport } from './routes/(errors)/500'
 import { Route as errors404RouteImport } from './routes/(errors)/404'
@@ -57,6 +58,12 @@ const UnauthenticatedIndexRoute = UnauthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedHl7ConverterRoute =
+  AuthenticatedHl7ConverterRouteImport.update({
+    id: '/hl7-converter',
+    path: '/hl7-converter',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
   path: '/503',
@@ -270,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/hl7-converter': typeof AuthenticatedHl7ConverterRoute
   '/': typeof UnauthenticatedIndexRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -308,6 +316,7 @@ export interface FileRoutesByTo {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+  '/hl7-converter': typeof AuthenticatedHl7ConverterRoute
   '/': typeof UnauthenticatedIndexRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -349,6 +358,7 @@ export interface FileRoutesById {
   '/(errors)/404': typeof errors404Route
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
+  '/_authenticated/hl7-converter': typeof AuthenticatedHl7ConverterRoute
   '/_unauthenticated/': typeof UnauthenticatedIndexRoute
   '/_authenticated/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/hl7-converter'
     | '/'
     | '/settings/account'
     | '/settings/appearance'
@@ -428,6 +439,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+    | '/hl7-converter'
     | '/'
     | '/settings/account'
     | '/settings/appearance'
@@ -468,6 +480,7 @@ export interface FileRouteTypes {
     | '/(errors)/404'
     | '/(errors)/500'
     | '/(errors)/503'
+    | '/_authenticated/hl7-converter'
     | '/_unauthenticated/'
     | '/_authenticated/settings/account'
     | '/_authenticated/settings/appearance'
@@ -533,6 +546,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof UnauthenticatedIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/hl7-converter': {
+      id: '/_authenticated/hl7-converter'
+      path: '/hl7-converter'
+      fullPath: '/hl7-converter'
+      preLoaderRoute: typeof AuthenticatedHl7ConverterRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -814,10 +834,12 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+
   AuthenticatedWorkflowAnalyticsRoute: typeof AuthenticatedWorkflowAnalyticsRoute
   AuthenticatedWorkflowPdfRoute: typeof AuthenticatedWorkflowPdfRoute
   AuthenticatedWorkflowReturnRoute: typeof AuthenticatedWorkflowReturnRoute
   AuthenticatedWorkflowUpdateRoute: typeof AuthenticatedWorkflowUpdateRoute
+  AuthenticatedHl7ConverterRoute: typeof AuthenticatedHl7ConverterRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedDashIndexRoute: typeof AuthenticatedDashIndexRoute
@@ -835,6 +857,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedWorkflowPdfRoute: AuthenticatedWorkflowPdfRoute,
   AuthenticatedWorkflowReturnRoute: AuthenticatedWorkflowReturnRoute,
   AuthenticatedWorkflowUpdateRoute: AuthenticatedWorkflowUpdateRoute,
+  AuthenticatedHl7ConverterRoute: AuthenticatedHl7ConverterRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedDashIndexRoute: AuthenticatedDashIndexRoute,

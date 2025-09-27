@@ -11,7 +11,7 @@ import uvicorn
 import logging
 
 from app.config import settings
-from app.routers import upload, formats, browse, samples
+from app.routers import upload, formats, browse, samples, mastra, conversions
 
 # Configure logging
 logging.basicConfig(
@@ -48,6 +48,8 @@ app.include_router(upload.router, prefix="/api/v1", tags=["upload"])
 app.include_router(formats.router, prefix="/api/v1", tags=["formats"])
 app.include_router(browse.router, prefix="/api/v1", tags=["browse"])
 app.include_router(samples.router, prefix="/api/v1", tags=["samples"])
+app.include_router(mastra.router, prefix="/api/v1", tags=["mastra"])
+app.include_router(conversions.router, prefix="/api/v1", tags=["conversions"])
 
 @app.get("/")
 async def root():
