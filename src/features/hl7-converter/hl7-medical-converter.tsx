@@ -530,15 +530,16 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                           Download PDF
                         </Button>
                       </div>
-                      {result.medicalDocument.html && (
-                        <div className="space-y-2">
-                          <h3 className="text-lg font-semibold">Document Preview</h3>
-                          <div 
-                            className="bg-white p-4 rounded-md border overflow-auto max-h-[400px]"
-                            dangerouslySetInnerHTML={{ __html: result.medicalDocument.html }}
+                      <div className="space-y-2">
+                        <h3 className="text-lg font-semibold">Document Preview</h3>
+                        <div className="border rounded-md overflow-hidden">
+                          <iframe
+                            src={`data:application/pdf;base64,${result.medicalDocument.pdfBase64}`}
+                            className="w-full h-[80vh]"
+                            title="Medical Document Preview"
                           />
                         </div>
-                      )}
+                      </div>
                       <div className="mt-4 p-4 bg-muted rounded-md">
                         <p className="text-sm text-muted-foreground text-center">
                           PDF generated successfully! Use the buttons above to view or download the complete document.
