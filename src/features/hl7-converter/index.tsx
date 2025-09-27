@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Copy, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Copy, CheckCircle, AlertCircle, Save } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
 
 interface ConversionResult {
   json?: {
@@ -27,6 +28,10 @@ export default function HL7Converter() {
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<{ json: boolean; xml: boolean }>({ json: false, xml: false });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveTitle, setSaveTitle] = useState('');
+  const [saveDescription, setSaveDescription] = useState('');
 
   const handleConvert = async () => {
     if (!hl7Input.trim()) {
@@ -77,6 +82,60 @@ export default function HL7Converter() {
       }, 2000);
     } catch (err) {
       console.error('Failed to copy text: ', err);
+    }
+  };
+
+  const handleSaveConversion = async () => {
+    if (!result || !hl7Input.trim()) {
+      setError('No conversion data to save');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+    setError(null);
+
+    try {
+      const saveData = {
+        hl7_content: hl7Input,
+        json_content: result.json?.success ? result.json.content : null,
+        xml_content: result.xml?.success ? result.xml.content : null,
+        conversion_metadata: {
+          json_metadata: result.json?.metadata,
+          xml_metadata: result.xml?.metadata,
+          conversion_timestamp: new Date().toISOString()
+        },
+        title: saveTitle.trim() || undefined,
+        description: saveDescription.trim() || undefined
+      };
+
+      const response = await fetch('/api/v1/conversions/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(saveData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const responseData = await response.json();
+      
+      if (responseData.success) {
+        setSaveSuccess(true);
+        setSaveTitle('');
+        setSaveDescription('');
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        setError(responseData.message || 'Failed to save conversion');
+      }
+    } catch (err) {
+      console.error('Save error:', err);
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred while saving');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -269,6 +328,70 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   <pre className="bg-muted p-3 rounded text-sm">
                     {JSON.stringify(result.xml.metadata, null, 2)}
                   </pre>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Save Conversion Section */}
+      {result && (result.json?.success || result.xml?.success) && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Save Conversion</CardTitle>
+            <CardDescription>
+              Save this conversion to the database for future reference
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="save-title" className="text-sm font-medium">
+                  Title (optional)
+                </label>
+                <Input
+                  id="save-title"
+                  placeholder="e.g., Patient Admission - John Doe"
+                  value={saveTitle}
+                  onChange={(e) => setSaveTitle(e.target.value)}
+                  maxLength={200}
+                />
+              </div>
+              <div>
+                <label htmlFor="save-description" className="text-sm font-medium">
+                  Description (optional)
+                </label>
+                <Input
+                  id="save-description"
+                  placeholder="e.g., ADT message for patient admission"
+                  value={saveDescription}
+                  onChange={(e) => setSaveDescription(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex gap-2 items-center">
+              <Button
+                onClick={handleSaveConversion}
+                disabled={isSaving}
+                className="flex items-center gap-2"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save Conversion
+                  </>
+                )}
+              </Button>
+              {saveSuccess && (
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="text-sm">Saved successfully!</span>
                 </div>
               )}
             </div>

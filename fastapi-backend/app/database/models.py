@@ -224,3 +224,33 @@ class AllergyData(Base):
     
     def __repr__(self):
         return f"<AllergyData(id={self.id}, allergen='{self.allergen_description}')>"
+
+class SavedConversion(Base):
+    """Table for storing user-saved conversion results"""
+    __tablename__ = "saved_conversions"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    
+    # Original HL7 content
+    original_hl7_content = Column(Text, nullable=False)
+    
+    # Converted formats
+    json_content = Column(JSONB)
+    xml_content = Column(Text)
+    
+    # Metadata
+    conversion_metadata = Column(JSONB)  # Store metadata from both conversions
+    
+    # User identification (if auth is implemented later)
+    user_id = Column(String(100))  # Optional for future auth implementation
+    
+    # Additional info
+    title = Column(String(200))  # Optional title for the saved conversion
+    description = Column(Text)   # Optional description
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f"<SavedConversion(id={self.id}, title='{self.title}', created_at='{self.created_at}')>"
