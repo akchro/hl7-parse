@@ -144,7 +144,7 @@ export default function RealTimeEditingPage() {
                   Try Editing Demo
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link to="/home/features/secure-export">
+                  <Link to="/home/features/export">
                     Next: Secure Export <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -301,40 +301,6 @@ export default function RealTimeEditingPage() {
         </div>
       </motion.section>
 
-      {/* Workflow Benefits Section */}
-      <motion.section 
-        className="py-20 bg-muted/30"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Workflow Impact
-            </motion.h2>
-            <motion.p variants={fadeUp} className="text-muted-foreground text-xl max-w-3xl mx-auto">
-              Significant improvements in data accuracy and operational efficiency
-            </motion.p>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {workflowBenefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                variants={fadeUp}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-bold mb-2 bg-background rounded-lg p-6 border">
-                  {benefit.metric}
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">{benefit.description}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
       {/* Use Cases Section */}
       <motion.section 
         className="py-20"
@@ -404,45 +370,6 @@ export default function RealTimeEditingPage() {
         </div>
       </motion.section>
 
-      {/* CTA Section */}
-      <motion.section 
-        className="py-20"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-muted/50 border-0">
-            <CardContent className="p-12 text-center">
-              <motion.h2 
-                variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold mb-4"
-              >
-                Ready to Edit HL7 Data with Confidence?
-              </motion.h2>
-              <motion.p 
-                variants={fadeUp}
-                className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto"
-              >
-                Experience the power of real-time HL7 editing that maintains data integrity while streamlining clinical workflows.
-              </motion.p>
-              <motion.div 
-                variants={fadeUp}
-                className="flex flex-wrap gap-4 justify-center"
-              >
-                <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
-                  Start Free Trial <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  <Play className="h-4 w-4 mr-2" />
-                  Try Editing Demo
-                </Button>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.section>
-
       {/* Navigation Section */}
       <motion.section 
         className="py-20 border-t"
@@ -460,18 +387,18 @@ export default function RealTimeEditingPage() {
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
               <Button variant="outline" asChild>
-                <Link to="/home/features/hl7-translation">
+                <Link to="/home/features/translation">
                   <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
                   HL7 Translation
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/secure-export">
+                <Link to="/home/features/export">
                   Secure Export <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/workflow-optimization">
+                <Link to="/home/features/workflow">
                   Workflow Optimization <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>

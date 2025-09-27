@@ -125,7 +125,7 @@ export default function WorkflowOptimizationPage() {
                   View Workflow Demo
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link to="/home/features">
+                  <Link to="/">
                     Back to Features <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -225,67 +225,6 @@ export default function WorkflowOptimizationPage() {
         className="py-20"
         initial="hidden"
         animate="visible"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Impact Metrics
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {efficiencyMetrics.map((metric, index) => (
-              <motion.div key={index} variants={fadeUp} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold mb-2 bg-background rounded-lg p-6 border">
-                  {metric.metric}
-                </div>
-                <div className="text-sm text-muted-foreground">{metric.description}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section 
-        className="py-20 bg-muted/30"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Optimized Workflow Areas
-            </motion.h2>
-          </div>
-
-          <div className="grid gap-8 md:grid-cols-3">
-            {workflowAreas.map((area, index) => (
-              <motion.div key={index} variants={fadeUp}>
-                <Card className="h-full border-0 bg-background">
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2">
-                      <div className="bg-foreground text-background p-2 rounded">
-                        {area.icon}
-                      </div>
-                      <CardTitle className="text-xl">{area.area}</CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-base">{area.improvement}</CardDescription>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section 
-        className="py-20"
-        initial="hidden"
-        animate="visible"
         variants={fadeIn}
       >
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -324,17 +263,17 @@ export default function WorkflowOptimizationPage() {
             </motion.h2>
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
               <Button variant="outline" asChild>
-                <Link to="/home/features/hl7-translation">
+                <Link to="/home/features/translation">
                   HL7 Translation
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/real-time-editing">
+                <Link to="/home/features/edit">
                   Real-time Editing
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/secure-export">
+                <Link to="/home/features/export">
                   Secure Export
                 </Link>
               </Button>

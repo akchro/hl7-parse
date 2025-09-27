@@ -125,7 +125,7 @@ export default function SecureExportPage() {
                   Try Export Demo
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link to="/home/features/workflow-optimization">
+                  <Link to="/home/features/workflow">
                     Next: Workflow Optimization <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -212,61 +212,6 @@ export default function SecureExportPage() {
       </motion.section>
 
       <motion.section 
-        className="py-20"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Security & Performance
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {securityMetrics.map((metric, index) => (
-              <motion.div key={index} variants={fadeUp} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold mb-2 bg-background rounded-lg p-6 border">
-                  {metric.metric}
-                </div>
-                <div className="text-sm text-muted-foreground">{metric.description}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      <motion.section 
-        className="py-20"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-muted/50 border-0">
-            <CardContent className="p-12 text-center">
-              <motion.h2 variants={fadeUp} className="text-2xl md:text-3xl font-bold mb-4">
-                Ready to Export with Confidence?
-              </motion.h2>
-              <motion.p variants={fadeUp} className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto">
-                Generate secure, compliant exports in seconds without compromising data integrity.
-              </motion.p>
-              <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
-                <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
-                  Start Free Trial <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  <Play className="h-4 w-4 mr-2" />
-                  View Export Demo
-                </Button>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.section>
-
-      <motion.section 
         className="py-20 border-t"
         initial="hidden"
         animate="visible"
@@ -279,18 +224,18 @@ export default function SecureExportPage() {
             </motion.h2>
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
               <Button variant="outline" asChild>
-                <Link to="/home/features/real-time-editing">
+                <Link to="/home/features/edit">
                   <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
                   Real-time Editing
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/workflow-optimization">
+                <Link to="/home/features/workflow">
                   Workflow Optimization <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/hl7-translation">
+                <Link to="/home/features/translation">
                   HL7 Translation <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>

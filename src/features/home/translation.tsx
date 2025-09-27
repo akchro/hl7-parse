@@ -145,7 +145,7 @@ export default function HL7TranslationPage() {
                   See Translation Demo
                 </Button>
                 <Button size="lg" variant="outline" asChild>
-                  <Link to="/home/features/real-time-editing">
+                  <Link to="/home/features/edit">
                     Next: Real-time Editing <ArrowRight className="h-4 w-4 ml-2" />
                   </Link>
                 </Button>
@@ -283,76 +283,6 @@ PV1|1|I|ICU^ room 101|||||||||||||||||||||||||||||||||202401200800`}
         </div>
       </motion.section>
 
-      {/* Benefits Section */}
-      <motion.section 
-        className="py-20 bg-muted/30"
-        initial="hidden"
-        animate="visible"
-        variants={staggerContainer}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Translation Performance
-            </motion.h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {benefits.map((benefit, index) => (
-              <motion.div
-                key={index}
-                variants={fadeUp}
-                className="text-center"
-              >
-                <div className="text-3xl md:text-4xl font-bold mb-2 bg-background rounded-lg p-6 border">
-                  {benefit.metric}
-                </div>
-                <div className="text-sm text-muted-foreground mt-2">{benefit.description}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* CTA Section */}
-      <motion.section 
-        className="py-20"
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="bg-muted/50 border-0">
-            <CardContent className="p-12 text-center">
-              <motion.h2 
-                variants={fadeUp}
-                className="text-2xl md:text-3xl font-bold mb-4"
-              >
-                Ready to Simplify HL7 Data?
-              </motion.h2>
-              <motion.p 
-                variants={fadeUp}
-                className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto"
-              >
-                Experience how HL7 LiteBoard can transform complex messages into actionable clinical information.
-              </motion.p>
-              <motion.div 
-                variants={fadeUp}
-                className="flex flex-wrap gap-4 justify-center"
-              >
-                <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
-                  Start Free Trial <ArrowRight className="h-4 w-4" />
-                </Button>
-                <Button size="lg" variant="outline">
-                  <Play className="h-4 w-4 mr-2" />
-                  View Live Demo
-                </Button>
-              </motion.div>
-            </CardContent>
-          </Card>
-        </div>
-      </motion.section>
-
       {/* Navigation Section */}
       <motion.section 
         className="py-20 border-t"
@@ -370,17 +300,17 @@ PV1|1|I|ICU^ room 101|||||||||||||||||||||||||||||||||202401200800`}
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
               <Button variant="outline" asChild>
-                <Link to="/home/features/real-time-editing">
+                <Link to="/home/features/edit">
                   Real-time Editing <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/secure-export">
+                <Link to="/home/features/export">
                   Secure Export <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/home/features/workflow-optimization">
+                <Link to="/home/features/workflow">
                   Workflow Optimization <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
