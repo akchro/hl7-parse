@@ -1,5 +1,5 @@
 services:
-  postgres:
+  hl7-postgres:
     image: postgres:15
     container_name: hl7-postgres
     environment:
@@ -31,23 +31,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      postgres:
-        condition: service_healthy
+      - hl7-postgres
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: hl7-frontend
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
-    ports:
-      - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8000
-    command: npm run dev -- --host 0.0.0.0
 
   nginx:
     image: nginx:alpine
@@ -57,7 +42,6 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
-      - frontend
       - backend
 
 volumes:
