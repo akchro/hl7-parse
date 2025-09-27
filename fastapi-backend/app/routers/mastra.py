@@ -8,7 +8,7 @@ from typing import Optional
 import logging
 
 from app.services.mastra_service import MastraService, MockMastraService
-from app.utils.file_handler import save_uploaded_file
+from app.utils.file_handler import file_handler
 from app.models.hl7_models import ConversionRequest, ConversionResponse
 
 logger = logging.getLogger(__name__)
@@ -123,7 +123,8 @@ async def convert_uploaded_file_to_json(file: UploadFile = File(...)):
     """
     try:
         # Save uploaded file
-        file_path = await save_uploaded_file(file)
+        content = await file.read()
+        file_path = await file_handler.save_uploaded_file(file.filename, content)
         
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -154,7 +155,8 @@ async def convert_uploaded_file_to_xml(file: UploadFile = File(...)):
     """
     try:
         # Save uploaded file
-        file_path = await save_uploaded_file(file)
+        content = await file.read()
+        file_path = await file_handler.save_uploaded_file(file.filename, content)
         
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -185,7 +187,8 @@ async def convert_uploaded_file_to_both_formats(file: UploadFile = File(...)):
     """
     try:
         # Save uploaded file
-        file_path = await save_uploaded_file(file)
+        content = await file.read()
+        file_path = await file_handler.save_uploaded_file(file.filename, content)
         
         # Read file content
         with open(file_path, 'r', encoding='utf-8') as f:

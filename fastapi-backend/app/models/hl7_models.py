@@ -172,3 +172,14 @@ class DownloadResponse(BaseModel):
     filename: str
     content_type: str
     content_length: int
+
+# Mastra Conversion Models
+class ConversionRequest(BaseModel):
+    """Request model for HL7 conversion"""
+    hl7_content: str = Field(..., description="HL7 message content to convert")
+
+class ConversionResponse(BaseModel):
+    """Response model for HL7 conversion"""
+    success: bool = Field(..., description="Whether conversion was successful")
+    message: str = Field(..., description="Status message")
+    data: Optional[Dict[str, Any]] = Field(None, description="Converted data")
