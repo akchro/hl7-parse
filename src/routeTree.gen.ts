@@ -9,7 +9,6 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UnauthenticatedRouteRouteImport } from './routes/_unauthenticated/route'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as UnauthenticatedIndexRouteImport } from './routes/_unauthenticated/index'
 import { Route as errors503RouteImport } from './routes/(errors)/503'
@@ -30,25 +29,28 @@ import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_auth
 import { Route as AuthenticatedDashIndexRouteImport } from './routes/_authenticated/dash/index'
 import { Route as AuthenticatedChatsIndexRouteImport } from './routes/_authenticated/chats/index'
 import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authenticated/apps/index'
+import { Route as UnauthenticatedHomeSolutionRouteImport } from './routes/_unauthenticated/home/solution'
+import { Route as UnauthenticatedHomeProblemRouteImport } from './routes/_unauthenticated/home/problem'
+import { Route as UnauthenticatedHomeDemoRouteImport } from './routes/_unauthenticated/home/demo'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedDashResumesIndexRouteImport } from './routes/_authenticated/dash/resumes/index'
 import { Route as AuthenticatedDashConnectionsIndexRouteImport } from './routes/_authenticated/dash/connections/index'
+import { Route as UnauthenticatedHomeFeaturesWorkflowRouteImport } from './routes/_unauthenticated/home/features/workflow'
+import { Route as UnauthenticatedHomeFeaturesTranslationRouteImport } from './routes/_unauthenticated/home/features/translation'
+import { Route as UnauthenticatedHomeFeaturesExportRouteImport } from './routes/_unauthenticated/home/features/export'
+import { Route as UnauthenticatedHomeFeaturesEditRouteImport } from './routes/_unauthenticated/home/features/edit'
 
-const UnauthenticatedRouteRoute = UnauthenticatedRouteRouteImport.update({
-  id: '/_unauthenticated',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UnauthenticatedIndexRoute = UnauthenticatedIndexRouteImport.update({
-  id: '/',
+  id: '/_unauthenticated/',
   path: '/',
-  getParentRoute: () => UnauthenticatedRouteRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
 const errors503Route = errors503RouteImport.update({
   id: '/(errors)/503',
@@ -143,6 +145,23 @@ const AuthenticatedAppsIndexRoute = AuthenticatedAppsIndexRouteImport.update({
   path: '/apps/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const UnauthenticatedHomeSolutionRoute =
+  UnauthenticatedHomeSolutionRouteImport.update({
+    id: '/_unauthenticated/home/solution',
+    path: '/home/solution',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const UnauthenticatedHomeProblemRoute =
+  UnauthenticatedHomeProblemRouteImport.update({
+    id: '/_unauthenticated/home/problem',
+    path: '/home/problem',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const UnauthenticatedHomeDemoRoute = UnauthenticatedHomeDemoRouteImport.update({
+  id: '/_unauthenticated/home/demo',
+  path: '/home/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedSettingsNotificationsRoute =
   AuthenticatedSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -179,6 +198,30 @@ const AuthenticatedDashConnectionsIndexRoute =
     path: '/dash/connections/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const UnauthenticatedHomeFeaturesWorkflowRoute =
+  UnauthenticatedHomeFeaturesWorkflowRouteImport.update({
+    id: '/_unauthenticated/home/features/workflow',
+    path: '/home/features/workflow',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const UnauthenticatedHomeFeaturesTranslationRoute =
+  UnauthenticatedHomeFeaturesTranslationRouteImport.update({
+    id: '/_unauthenticated/home/features/translation',
+    path: '/home/features/translation',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const UnauthenticatedHomeFeaturesExportRoute =
+  UnauthenticatedHomeFeaturesExportRouteImport.update({
+    id: '/_unauthenticated/home/features/export',
+    path: '/home/features/export',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const UnauthenticatedHomeFeaturesEditRoute =
+  UnauthenticatedHomeFeaturesEditRouteImport.update({
+    id: '/_unauthenticated/home/features/edit',
+    path: '/home/features/edit',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
@@ -197,6 +240,9 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/home/demo': typeof UnauthenticatedHomeDemoRoute
+  '/home/problem': typeof UnauthenticatedHomeProblemRoute
+  '/home/solution': typeof UnauthenticatedHomeSolutionRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/dash': typeof AuthenticatedDashIndexRoute
@@ -204,6 +250,10 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
+  '/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
+  '/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
+  '/home/features/workflow': typeof UnauthenticatedHomeFeaturesWorkflowRoute
   '/dash/connections': typeof AuthenticatedDashConnectionsIndexRoute
   '/dash/resumes': typeof AuthenticatedDashResumesIndexRoute
 }
@@ -223,6 +273,9 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/home/demo': typeof UnauthenticatedHomeDemoRoute
+  '/home/problem': typeof UnauthenticatedHomeProblemRoute
+  '/home/solution': typeof UnauthenticatedHomeSolutionRoute
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/dash': typeof AuthenticatedDashIndexRoute
@@ -230,13 +283,16 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
+  '/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
+  '/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
+  '/home/features/workflow': typeof UnauthenticatedHomeFeaturesWorkflowRoute
   '/dash/connections': typeof AuthenticatedDashConnectionsIndexRoute
   '/dash/resumes': typeof AuthenticatedDashResumesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
-  '/_unauthenticated': typeof UnauthenticatedRouteRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/(auth)/forgot-password': typeof authForgotPasswordRoute
   '/(auth)/otp': typeof authOtpRoute
@@ -253,6 +309,9 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_unauthenticated/home/demo': typeof UnauthenticatedHomeDemoRoute
+  '/_unauthenticated/home/problem': typeof UnauthenticatedHomeProblemRoute
+  '/_unauthenticated/home/solution': typeof UnauthenticatedHomeSolutionRoute
   '/_authenticated/apps/': typeof AuthenticatedAppsIndexRoute
   '/_authenticated/chats/': typeof AuthenticatedChatsIndexRoute
   '/_authenticated/dash/': typeof AuthenticatedDashIndexRoute
@@ -260,6 +319,10 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_unauthenticated/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
+  '/_unauthenticated/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
+  '/_unauthenticated/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
+  '/_unauthenticated/home/features/workflow': typeof UnauthenticatedHomeFeaturesWorkflowRoute
   '/_authenticated/dash/connections/': typeof AuthenticatedDashConnectionsIndexRoute
   '/_authenticated/dash/resumes/': typeof AuthenticatedDashResumesIndexRoute
 }
@@ -282,6 +345,9 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/home/demo'
+    | '/home/problem'
+    | '/home/solution'
     | '/apps'
     | '/chats'
     | '/dash'
@@ -289,6 +355,10 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/tasks'
     | '/users'
+    | '/home/features/edit'
+    | '/home/features/export'
+    | '/home/features/translation'
+    | '/home/features/workflow'
     | '/dash/connections'
     | '/dash/resumes'
   fileRoutesByTo: FileRoutesByTo
@@ -308,6 +378,9 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/home/demo'
+    | '/home/problem'
+    | '/home/solution'
     | '/apps'
     | '/chats'
     | '/dash'
@@ -315,12 +388,15 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/users'
+    | '/home/features/edit'
+    | '/home/features/export'
+    | '/home/features/translation'
+    | '/home/features/workflow'
     | '/dash/connections'
     | '/dash/resumes'
   id:
     | '__root__'
     | '/_authenticated'
-    | '/_unauthenticated'
     | '/_authenticated/settings'
     | '/(auth)/forgot-password'
     | '/(auth)/otp'
@@ -337,6 +413,9 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_unauthenticated/home/demo'
+    | '/_unauthenticated/home/problem'
+    | '/_unauthenticated/home/solution'
     | '/_authenticated/apps/'
     | '/_authenticated/chats/'
     | '/_authenticated/dash/'
@@ -344,13 +423,16 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_unauthenticated/home/features/edit'
+    | '/_unauthenticated/home/features/export'
+    | '/_unauthenticated/home/features/translation'
+    | '/_unauthenticated/home/features/workflow'
     | '/_authenticated/dash/connections/'
     | '/_authenticated/dash/resumes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
-  UnauthenticatedRouteRoute: typeof UnauthenticatedRouteRouteWithChildren
   authForgotPasswordRoute: typeof authForgotPasswordRoute
   authOtpRoute: typeof authOtpRoute
   authSignInRoute: typeof authSignInRoute
@@ -361,17 +443,18 @@ export interface RootRouteChildren {
   errors404Route: typeof errors404Route
   errors500Route: typeof errors500Route
   errors503Route: typeof errors503Route
+  UnauthenticatedIndexRoute: typeof UnauthenticatedIndexRoute
+  UnauthenticatedHomeDemoRoute: typeof UnauthenticatedHomeDemoRoute
+  UnauthenticatedHomeProblemRoute: typeof UnauthenticatedHomeProblemRoute
+  UnauthenticatedHomeSolutionRoute: typeof UnauthenticatedHomeSolutionRoute
+  UnauthenticatedHomeFeaturesEditRoute: typeof UnauthenticatedHomeFeaturesEditRoute
+  UnauthenticatedHomeFeaturesExportRoute: typeof UnauthenticatedHomeFeaturesExportRoute
+  UnauthenticatedHomeFeaturesTranslationRoute: typeof UnauthenticatedHomeFeaturesTranslationRoute
+  UnauthenticatedHomeFeaturesWorkflowRoute: typeof UnauthenticatedHomeFeaturesWorkflowRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/_unauthenticated': {
-      id: '/_unauthenticated'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof UnauthenticatedRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
@@ -384,7 +467,7 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof UnauthenticatedIndexRouteImport
-      parentRoute: typeof UnauthenticatedRouteRoute
+      parentRoute: typeof rootRouteImport
     }
     '/(errors)/503': {
       id: '/(errors)/503'
@@ -512,6 +595,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_unauthenticated/home/solution': {
+      id: '/_unauthenticated/home/solution'
+      path: '/home/solution'
+      fullPath: '/home/solution'
+      preLoaderRoute: typeof UnauthenticatedHomeSolutionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unauthenticated/home/problem': {
+      id: '/_unauthenticated/home/problem'
+      path: '/home/problem'
+      fullPath: '/home/problem'
+      preLoaderRoute: typeof UnauthenticatedHomeProblemRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unauthenticated/home/demo': {
+      id: '/_unauthenticated/home/demo'
+      path: '/home/demo'
+      fullPath: '/home/demo'
+      preLoaderRoute: typeof UnauthenticatedHomeDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/settings/notifications': {
       id: '/_authenticated/settings/notifications'
       path: '/notifications'
@@ -553,6 +657,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/dash/connections'
       preLoaderRoute: typeof AuthenticatedDashConnectionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_unauthenticated/home/features/workflow': {
+      id: '/_unauthenticated/home/features/workflow'
+      path: '/home/features/workflow'
+      fullPath: '/home/features/workflow'
+      preLoaderRoute: typeof UnauthenticatedHomeFeaturesWorkflowRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unauthenticated/home/features/translation': {
+      id: '/_unauthenticated/home/features/translation'
+      path: '/home/features/translation'
+      fullPath: '/home/features/translation'
+      preLoaderRoute: typeof UnauthenticatedHomeFeaturesTranslationRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unauthenticated/home/features/export': {
+      id: '/_unauthenticated/home/features/export'
+      path: '/home/features/export'
+      fullPath: '/home/features/export'
+      preLoaderRoute: typeof UnauthenticatedHomeFeaturesExportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_unauthenticated/home/features/edit': {
+      id: '/_unauthenticated/home/features/edit'
+      path: '/home/features/edit'
+      fullPath: '/home/features/edit'
+      preLoaderRoute: typeof UnauthenticatedHomeFeaturesEditRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -608,20 +740,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface UnauthenticatedRouteRouteChildren {
-  UnauthenticatedIndexRoute: typeof UnauthenticatedIndexRoute
-}
-
-const UnauthenticatedRouteRouteChildren: UnauthenticatedRouteRouteChildren = {
-  UnauthenticatedIndexRoute: UnauthenticatedIndexRoute,
-}
-
-const UnauthenticatedRouteRouteWithChildren =
-  UnauthenticatedRouteRoute._addFileChildren(UnauthenticatedRouteRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
-  UnauthenticatedRouteRoute: UnauthenticatedRouteRouteWithChildren,
   authForgotPasswordRoute: authForgotPasswordRoute,
   authOtpRoute: authOtpRoute,
   authSignInRoute: authSignInRoute,
@@ -632,6 +752,17 @@ const rootRouteChildren: RootRouteChildren = {
   errors404Route: errors404Route,
   errors500Route: errors500Route,
   errors503Route: errors503Route,
+  UnauthenticatedIndexRoute: UnauthenticatedIndexRoute,
+  UnauthenticatedHomeDemoRoute: UnauthenticatedHomeDemoRoute,
+  UnauthenticatedHomeProblemRoute: UnauthenticatedHomeProblemRoute,
+  UnauthenticatedHomeSolutionRoute: UnauthenticatedHomeSolutionRoute,
+  UnauthenticatedHomeFeaturesEditRoute: UnauthenticatedHomeFeaturesEditRoute,
+  UnauthenticatedHomeFeaturesExportRoute:
+    UnauthenticatedHomeFeaturesExportRoute,
+  UnauthenticatedHomeFeaturesTranslationRoute:
+    UnauthenticatedHomeFeaturesTranslationRoute,
+  UnauthenticatedHomeFeaturesWorkflowRoute:
+    UnauthenticatedHomeFeaturesWorkflowRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

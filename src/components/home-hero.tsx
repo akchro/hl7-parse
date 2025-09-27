@@ -6,7 +6,7 @@ import { Card } from "@/components/ui/card";
 
 export function HeroSection() {
   return (
-    <section className="relative bg-background pt-[130px] md:pt-[120px] pb-12 lg:pb-0 px-6 sm:px-8">
+    <section className="relative bg-background pt-[150px] md:pt-[150px] pb-12 lg:pb-0 px-6 sm:px-8">
       <div className="container mx-auto">
         <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-6 sm:py-8">
           {/* Content - Always comes first in DOM */}

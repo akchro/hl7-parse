@@ -1,18 +1,20 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
 import {
-  ArrowRight,
-  FileText,
-  Link as LinkIcon,
-  Users,
-  Search,
-  Mail,
+  Heart,
   Zap,
+  Shield,
+  FileText,
+  Clock,
+  DollarSign,
+  Users,
+  ArrowRight,
   CheckCircle,
-  Upload,
-  Sparkles,
+  Play,
+  Download,
+  Edit,
+  Eye
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,11 +24,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/home-bar"
-import { Link } from "@tanstack/react-router"
+import { Footer } from "@/components/footer" // Import the Footer component
 
 const fadeIn = {
   hidden: { opacity: 0 },
@@ -47,76 +46,71 @@ const fadeUp = {
 }
 
 export default function Home() {
-  const [resumeFile, setResumeFile] = useState<File | null>(null)
-  const [jobDescription, setJobDescription] = useState("")
-
-  const processSteps = [
+  const problemPoints = [
     {
-      step: "1",
-      title: "Upload Resume",
-      description: "Upload your PDF resume or LaTeX code",
-      icon: Upload,
+      icon: <FileText className="h-5 w-5" />,
+      title: "Complexity of HL7",
+      description: "HL7 v2 is highly technical and difficult for non-technical users to interpret"
     },
     {
-      step: "2",
-      title: "Convert to ATS Format",
-      description: "AI converts your resume to optimized LaTeX format",
-      icon: FileText,
+      icon: <DollarSign className="h-5 w-5" />,
+      title: "Cost of Integration",
+      description: "Hospitals spend significant resources on interface engines and consultants"
     },
     {
-      step: "3",
-      title: "Analyze Job Description",
-      description: "Paste job link for AI analysis and keyword extraction",
-      icon: LinkIcon,
+      icon: <Clock className="h-5 w-5" />,
+      title: "Workflow Inefficiencies",
+      description: "Multiple handoffs result in delays, redundant data entry, and errors"
     },
     {
-      step: "4",
-      title: "Optimize Resume",
-      description: "AI tailors your resume with targeted keywords",
-      icon: Sparkles,
-    },
-    {
-      step: "5",
-      title: "Find Connections",
-      description: "AI searches LinkedIn for company connections",
-      icon: Search,
-    },
-    {
-      step: "6",
-      title: "Get Referral Email",
-      description: "AI drafts professional referral request emails",
-      icon: Mail,
-    },
+      icon: <Users className="h-5 w-5" />,
+      title: "Accessibility Gap",
+      description: "Non-technical staff cannot act on HL7 data without IT involvement"
+    }
   ]
 
-  const features = [
+  const solutionFeatures = [
     {
-      title: "ATS-Optimized Formatting",
-      description:
-        "Convert your resume to Applicant Tracking System-friendly LaTeX format that gets noticed",
-      icon: <CheckCircle className="h-6 w-6 text-primary" />,
+      icon: <Download className="h-6 w-6" />,
+      title: "HL7 Message Ingestion",
+      description: "Ingests HL7 v2 messages (ADT for admissions, ORU for labs) seamlessly"
     },
     {
-      title: "Keyword Optimization",
-      description:
-        "AI analyzes job descriptions and strategically incorporates relevant keywords",
-      icon: <Search className="h-6 w-6 text-primary" />,
+      icon: <Eye className="h-6 w-6" />,
+      title: "Intuitive Dashboard",
+      description: "Transforms and displays patient information in a clean, readable format"
     },
     {
-      title: "LinkedIn Connection Finder",
-      description:
-        "Automatically find connections at target companies for referrals",
-      icon: <Users className="h-6 w-6 text-primary" />,
+      icon: <Edit className="h-6 w-6" />,
+      title: "Real-time Editing",
+      description: "Enables real-time edits to key fields like allergies and medications"
     },
     {
-      title: "Professional Email Drafts",
-      description: "AI-generated professional emails for referral requests",
-      icon: <Mail className="h-6 w-6 text-primary" />,
+      icon: <Zap className="h-6 w-6" />,
+      title: "Interoperability Maintenance",
+      description: "Generates updated HL7/FHIR messages to maintain system compatibility"
     },
+    {
+      icon: <FileText className="h-6 w-6" />,
+      title: "One-Click Export",
+      description: "Provides export in PDF, JSON, or XML formats for easy sharing"
+    },
+    {
+      icon: <Shield className="h-6 w-6" />,
+      title: "Clinician-Friendly",
+      description: "Bridges the gap between technical standards and daily clinical needs"
+    }
+  ]
+
+  const benefits = [
+    { metric: "70%", description: "Reduction in intake and discharge times" },
+    { metric: "60%", description: "Lower integration costs for healthcare systems" },
+    { metric: "90%", description: "Improved data accuracy and accessibility" },
+    { metric: "50%", description: "Reduced IT dependency for clinical staff" }
   ]
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Navbar */}
       <Navbar />
 
@@ -129,20 +123,29 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7 }}
             >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="flex items-center justify-center w-10 h-10 bg-foreground rounded-lg">
+                  <Heart className="w-6 h-6 text-background" />
+                </div>
+                <span className="text-lg font-semibold text-muted-foreground">HL7 LiteBoard</span>
+              </div>
+              
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-                Transform Your{" "}
-                <span className="text-primary">Job Search</span> with AI
+                Simplifying{" "}
+                <span className="text-foreground">Healthcare Data</span> for Clinicians
               </h1>
               <p className="text-xl text-muted-foreground mb-8 max-w-2xl">
-                Resume Refiner uses advanced AI to optimize your resume, find
-                referrals, and draft professional emails—all automatically.
+                A lightweight, clinician-friendly solution that transforms complex HL7 data streams 
+                into digestible, editable, and exportable formats—bridging the gap between technical 
+                standards and daily clinical workflow needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button size="lg" className="gap-2">
-                  Get Started <ArrowRight className="h-4 w-4" />
+                <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+                  <Play className="h-4 w-4" />
+                  Live Demo
                 </Button>
                 <Button size="lg" variant="outline">
-                  View Demo
+                  Learn More
                 </Button>
               </div>
             </motion.div>
@@ -153,228 +156,227 @@ export default function Home() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="relative"
             >
-              <div className="bg-primary/10 rounded-2xl p-8 aspect-square flex items-center justify-center">
-                <div className="relative">
-                  <FileText className="h-24 w-24 text-primary mx-auto mb-6" />
-                  <div className="absolute -top-4 -right-4 bg-primary text-primary-foreground rounded-full p-2">
-                    <Zap className="h-6 w-6" />
+              <Card className="bg-muted/50 border-0 p-8">
+                <CardContent className="p-0">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-4">
+                      <div className="bg-background p-4 rounded-lg border">
+                        <FileText className="h-8 w-8 text-foreground mb-2" />
+                        <h3 className="font-semibold">HL7 Input</h3>
+                        <p className="text-sm text-muted-foreground">Raw messages</p>
+                      </div>
+                      <div className="bg-background p-4 rounded-lg border">
+                        <Edit className="h-8 w-8 text-foreground mb-2" />
+                        <h3 className="font-semibold">Edit & Update</h3>
+                        <p className="text-sm text-muted-foreground">Real-time changes</p>
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <div className="bg-background p-4 rounded-lg border">
+                        <Eye className="h-8 w-8 text-foreground mb-2" />
+                        <h3 className="font-semibold">Visual Dashboard</h3>
+                        <p className="text-sm text-muted-foreground">Clean interface</p>
+                      </div>
+                      <div className="bg-background p-4 rounded-lg border">
+                        <Download className="h-8 w-8 text-foreground mb-2" />
+                        <h3 className="font-semibold">Export</h3>
+                        <p className="text-sm text-muted-foreground">PDF, JSON, XML</p>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </motion.div>
           </div>
         </div>
       </section>
 
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* How It Works Section */}
-        <motion.section
-          className="py-20"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
-          <div className="text-center mb-16">
-            <motion.h2
-              variants={fadeUp}
-              className="text-3xl md:text-4xl font-bold mb-6"
-            >
-              How <span className="text-primary">Resume Refiner</span> Works
-            </motion.h2>
-            <motion.p
-              variants={fadeUp}
-              className="text-muted-foreground text-xl max-w-3xl mx-auto"
-            >
-              Our AI-powered process transforms your job application strategy in
-              six simple steps
-            </motion.p>
-          </div>
-
-          {/* Workflow visualization */}
-          <div className="relative">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {processSteps.map((step, index) => {
-                const Icon = step.icon
-                return (
-                  <motion.div
-                    key={index}
-                    variants={fadeUp}
-                    transition={{ delay: index * 0.1 }}
-                    className="relative"
-                  >
-                    <Card className="h-full flex flex-col items-center text-center p-6 shadow-sm">
-                      <div className="mb-4 bg-primary/10 text-primary rounded-full p-4">
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <h3 className="font-semibold text-lg">{`Step ${step.step}: ${step.title}`}</h3>
-                      <p className="text-muted-foreground text-sm mt-2">
-                        {step.description}
-                      </p>
-                    </Card>
-                    {/* Connector line */}
-                    {index < processSteps.length - 1 && (
-                      <div className="hidden md:block absolute top-1/2 right-[-24px] w-12 h-[2px] bg-muted" />
-                    )}
-                  </motion.div>
-                )
-              })}
-            </div>
-          </div>
-        </motion.section>
-
-        {/* Try It Out Section */}
-        <motion.section 
-          className="py-20"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-        >
-          <Card className="bg-gradient-to-r from-primary/5 to-primary/10 border-0">
-            <CardContent className="p-8 md:p-12">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold mb-4">Try It Now</h2>
-                <p className="text-muted-foreground max-w-2xl mx-auto">
-                  Upload your resume and job description to see how Resume Refiner can transform your application
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Upload Resume (PDF or LaTeX)</label>
-                    <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 transition-colors">
-                      <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        {resumeFile ? resumeFile.name : "Click to upload or drag and drop"}
-                      </p>
-                      <Input 
-                        type="file" 
-                        className="hidden" 
-                        accept=".pdf,.tex"
-                        onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
-                      />
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Job Description URL</label>
-                    <Input 
-                      placeholder="Paste job description URL here"
-                      className="w-full"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Or paste job description</label>
-                    <Textarea 
-                      placeholder="Paste job description text here"
-                      rows={5}
-                      value={jobDescription}
-                      onChange={(e) => setJobDescription(e.target.value)}
-                    />
-                  </div>
-                  <Button className="w-full gap-2">
-                    <Sparkles className="h-4 w-4" />
-                    Optimize My Resume
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.section>
-
-        {/* Features Section */}
-        <motion.section 
-          className="py-20"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
+      {/* Problem Statement Section */}
+      <motion.section 
+        className="py-20 bg-muted/30"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
-              Powerful <span className="text-primary">Features</span>
+              The Healthcare Data Challenge
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground text-xl max-w-3xl mx-auto">
-              Everything you need to stand out in today's competitive job market
+              Current HL7 standards create significant barriers for healthcare professionals, 
+              leading to inefficiencies and increased costs across the system.
             </motion.p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature, index) => (
+            {problemPoints.map((point, index) => (
               <motion.div 
                 key={index}
                 variants={fadeUp}
                 transition={{ delay: index * 0.1 }}
-                className="text-center"
               >
-                <Card className="h-full border-0 bg-muted/50 hover:bg-muted transition-colors">
+                <Card className="h-full border-0 bg-background hover:bg-muted/50 transition-colors">
                   <CardHeader>
-                    <div className="flex justify-center mb-4">
-                      <div className="bg-primary/10 p-3 rounded-full">
-                        {feature.icon}
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-foreground/10 p-2 rounded-lg">
+                        {point.icon}
                       </div>
+                      <CardTitle className="text-lg">{point.title}</CardTitle>
                     </div>
-                    <CardTitle className="text-lg">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription>{feature.description}</CardDescription>
+                    <CardDescription>{point.description}</CardDescription>
                   </CardContent>
                 </Card>
               </motion.div>
             ))}
           </div>
-        </motion.section>
+        </div>
+      </motion.section>
 
-        {/* Stats Section */}
-        <motion.section 
-          className="py-16 grid grid-cols-2 md:grid-cols-4 gap-6"
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-        >
-          {[
-            { value: "3x", label: "More Interviews" },
-            { value: "87%", label: "Success Rate" },
-            { value: "2.5x", label: "Faster Hiring" },
-            { value: "500+", label: "Jobs Optimized" }
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              variants={fadeUp}
-              className="text-center"
-            >
-              <div className="text-2xl md:text-3xl font-bold text-primary mb-2">{stat.value}</div>
-              <div className="text-sm text-muted-foreground">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.section>
-
-        {/* CTA Section */}
-        <motion.section 
-          className="py-20 text-center"
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-        >
-          <div className="bg-primary/10 rounded-2xl p-12">
-            <h2 className="text-2xl md:text-3xl font-bold mb-4">Ready to Transform Your Job Search?</h2>
-            <p className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto">
-              Join thousands of job seekers who have landed their dream roles with Resume Refiner
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button size="lg" className="gap-2">
-                Get Started <ArrowRight className="h-4 w-4" />
-              </Button>
-              <Button size="lg" variant="outline">
-                View Pricing
-              </Button>
-            </div>
+      {/* Solution Section */}
+      <motion.section 
+        className="py-20"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
+              Our Innovative Solution
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-muted-foreground text-xl max-w-3xl mx-auto">
+              HL7 LiteBoard acts as a translation and interaction layer between hospital systems 
+              and healthcare professionals, improving usability without requiring deep technical expertise.
+            </motion.p>
           </div>
-        </motion.section>
-      </main>
 
-      {/* Footer */}
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {solutionFeatures.map((feature, index) => (
+              <motion.div 
+                key={index}
+                variants={fadeUp}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="h-full border hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="bg-foreground text-background p-2 rounded-lg">
+                        {feature.icon}
+                      </div>
+                      <CardTitle className="text-lg">{feature.title}</CardTitle>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base">{feature.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Benefits Section */}
+      <motion.section 
+        className="py-20 bg-muted/30"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-bold mb-6">
+              Measurable Impact
+            </motion.h2>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {benefits.map((benefit, index) => (
+              <motion.div
+                key={index}
+                variants={fadeUp}
+                className="text-center"
+              >
+                <div className="text-3xl md:text-4xl font-bold mb-2 bg-background rounded-lg p-6 border">
+                  {benefit.metric}
+                </div>
+                <div className="text-sm text-muted-foreground mt-2">{benefit.description}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </motion.section>
+
+      {/* CTA Section */}
+      <motion.section 
+        className="py-20"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <Card className="bg-muted/50 border-0">
+            <CardContent className="p-12 text-center">
+              <motion.h2 
+                variants={fadeUp}
+                className="text-2xl md:text-3xl font-bold mb-4"
+              >
+                Ready to Transform Your Healthcare Workflow?
+              </motion.h2>
+              <motion.p 
+                variants={fadeUp}
+                className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto"
+              >
+                Join healthcare providers who are already reducing costs and improving efficiency with HL7 LiteBoard.
+              </motion.p>
+              <motion.div 
+                variants={fadeUp}
+                className="flex flex-wrap gap-4 justify-center"
+              >
+                <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+                  Start Free Trial <ArrowRight className="h-4 w-4" />
+                </Button>
+                <Button size="lg" variant="outline">
+                  <Play className="h-4 w-4 mr-2" />
+                  Watch Demo
+                </Button>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </div>
+      </motion.section>
+
+      {/* Final Summary Section */}
+      <motion.section 
+        className="py-20 border-t"
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+      >
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            <motion.h2 variants={fadeUp} className="text-2xl md:text-3xl font-bold mb-6">
+              Executive Summary
+            </motion.h2>
+            <motion.p variants={fadeUp} className="text-lg text-muted-foreground mb-6">
+              HL7 LiteBoard is a lightweight, clinician-friendly solution that ingests HL7 data streams 
+              and presents them in a digestible, editable, and exportable format. By translating complex 
+              HL7 v2 messages into a clean, interactive dashboard, the platform allows healthcare professionals 
+              to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML).
+            </motion.p>
+            <motion.p variants={fadeUp} className="text-lg text-muted-foreground">
+              The result is a tool that bridges the gap between highly technical HL7 standards and the daily 
+              needs of clinical staff, reducing intake and discharge times while lowering integration costs 
+              for healthcare systems.
+            </motion.p>
+          </div>
+        </div>
+      </motion.section>
+
+      {/* Footer Component */}
       <Footer />
     </div>
   )

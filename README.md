@@ -84,6 +84,7 @@ npm install
 
 # Start development server
 npm run dev
+
 ```
 
 The app will be available at `http://localhost:5173`.
@@ -100,8 +101,6 @@ The app will be available at `http://localhost:5173`.
 # Start everything
 ./start.sh --all
 ```
-
----
 
 ## 🧪 Testing
 
@@ -122,7 +121,6 @@ npm test
 curl -X POST http://localhost:8000/api/v1/samples/process-all
 ```
 
----
 
 ## 📊 Access Points
 
@@ -131,7 +129,6 @@ curl -X POST http://localhost:8000/api/v1/samples/process-all
 * **Database Admin**: [http://localhost:8080](http://localhost:8080) ([admin@hl7liteboard.com](mailto:admin@hl7liteboard.com) / admin123)
 * **Mock Mastra**: [http://localhost:3001/health](http://localhost:3001/health)
 
----
 
 ## 🎯 Use Cases
 
@@ -140,7 +137,6 @@ curl -X POST http://localhost:8000/api/v1/samples/process-all
 * **Patient Transfers**: Streamlined ADT message management
 * **Discharge Planning**: Efficient preparation of discharge summaries
 
----
 
 ## 🔧 Development
 
@@ -211,5 +207,5 @@ MIT License – free to use and improve for better healthcare workflows.
 ---
 
 **Built for Better Healthcare Interoperability** 🏥✨
-HL7 LiteBoard bridges the technical gap between healthcare systems and the clinicians who use them.
 
+HL7 LiteBoard bridges the technical gap between healthcare systems and the clinicians who use them.
