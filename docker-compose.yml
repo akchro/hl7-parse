@@ -44,15 +44,13 @@ services:
       MASTRA_SERVICE_URL: http://hl7-mastra:3001
       PYTHONPATH: /app
     volumes:
-      - ./fastapi-backend/uploads:/app/uploads
-      - ./fastapi-backend/sample_files:/app/sample_files
+      - ./fastapi-backend:/app
     ports:
       - "8000:8000"
     depends_on:
-      hl7-postgres:
-        condition: service_healthy
-      mastra-service:
-        condition: service_healthy
+      - hl7-postgres
+      - mastra-service
+
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
