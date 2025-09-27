@@ -834,12 +834,11 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
-
+  AuthenticatedHl7ConverterRoute: typeof AuthenticatedHl7ConverterRoute
   AuthenticatedWorkflowAnalyticsRoute: typeof AuthenticatedWorkflowAnalyticsRoute
   AuthenticatedWorkflowPdfRoute: typeof AuthenticatedWorkflowPdfRoute
   AuthenticatedWorkflowReturnRoute: typeof AuthenticatedWorkflowReturnRoute
   AuthenticatedWorkflowUpdateRoute: typeof AuthenticatedWorkflowUpdateRoute
-  AuthenticatedHl7ConverterRoute: typeof AuthenticatedHl7ConverterRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedDashIndexRoute: typeof AuthenticatedDashIndexRoute
@@ -853,11 +852,11 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedHl7ConverterRoute: AuthenticatedHl7ConverterRoute,
   AuthenticatedWorkflowAnalyticsRoute: AuthenticatedWorkflowAnalyticsRoute,
   AuthenticatedWorkflowPdfRoute: AuthenticatedWorkflowPdfRoute,
   AuthenticatedWorkflowReturnRoute: AuthenticatedWorkflowReturnRoute,
   AuthenticatedWorkflowUpdateRoute: AuthenticatedWorkflowUpdateRoute,
-  AuthenticatedHl7ConverterRoute: AuthenticatedHl7ConverterRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedDashIndexRoute: AuthenticatedDashIndexRoute,
