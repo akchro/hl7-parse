@@ -67,27 +67,6 @@ export function Navbar() {
             Home
           </Link>
           
-          {/* Features Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-1">
-                Features <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-80 p-3 grid grid-cols-1 gap-2">
-              {featuresItems.map((item) => (
-                <DropdownMenuItem key={item.title} asChild>
-                  <Link to={item.route} className="flex items-start gap-3 p-3 rounded-lg w-full">
-                    <div className="text-blue-600 mt-0.5">{item.icon}</div>
-                    <div>
-                      <p className="font-medium text-sm">{item.title}</p>
-                      <p className="text-xs text-foreground/70">{item.description}</p>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
 
           <Link 
             to="/home/problem" 
@@ -113,7 +92,32 @@ export function Navbar() {
             <Play className="w-4 h-4" />
             Live Demo
           </Link>
+
+          {/* Features Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="flex items-center gap-1">
+                Features <ChevronDown className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-80 p-3 grid grid-cols-1 gap-2">
+              {featuresItems.map((item) => (
+                <DropdownMenuItem key={item.title} asChild>
+                  <Link to={item.route} className="flex items-start gap-3 p-3 rounded-lg w-full">
+                    <div className="text-blue-600 mt-0.5">{item.icon}</div>
+                    <div>
+                      <p className="font-medium text-sm">{item.title}</p>
+                      <p className="text-xs text-foreground/70">{item.description}</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
         </div>
+
+        
 
         {/* Buttons - Right Aligned */}
         <div className="flex items-center gap-4">
