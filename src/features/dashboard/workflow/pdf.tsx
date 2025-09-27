@@ -7,8 +7,6 @@ import {
   Download,
   Printer,
   Copy,
-  Check,
-  ArrowLeft,
   Eye,
   Shield,
   Calendar,
@@ -33,7 +31,6 @@ const fadeUp = {
   visible: { y: 0, opacity: 1 },
 }
 
-// API endpoints configuration for PDF generation
 const PDF_API_ENDPOINTS = {
   generate: '/api/generate-pdf', // POST endpoint for PDF generation
   preview: '/api/preview-pdf', // POST endpoint for PDF preview
@@ -335,59 +332,6 @@ export default function PDFGeneratorPage({
           </div>
         </div>
 
-        {/* HL7 Input Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>HL7 Message Input</CardTitle>
-            <CardDescription>
-              Paste your HL7 message below or use the default example
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="messageType">Message Type</Label>
-                  <Textarea
-                    id="messageType"
-                    value={customMessageType}
-                    onChange={(e) => setCustomMessageType(e.target.value)}
-                    className="font-mono text-sm h-10"
-                    placeholder="e.g., ADT^A01"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="messageTypeDisplay">Message Type Display</Label>
-                  <div className="flex items-center h-10 px-3 border rounded-md bg-muted/50">
-                    <span className="text-sm">{getMessageTypeDisplay()}</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="hl7Content">HL7 Message Content</Label>
-                <Textarea
-                  id="hl7Content"
-                  value={customHL7Content}
-                  onChange={(e) => handleHL7ContentChange(e.target.value)}
-                  rows={8}
-                  className="font-mono text-sm"
-                  placeholder="Paste your HL7 message here..."
-                />
-              </div>
-              <div className="flex justify-between">
-                <Button variant="outline" onClick={handleCopyHL7} className="gap-2">
-                  <Copy className="h-4 w-4" />
-                  Copy HL7
-                </Button>
-                <Button onClick={handlePreviewPDF} className="gap-2">
-                  <Eye className="h-4 w-4" />
-                  Generate Preview
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Patient Summary */}
           <div className="lg:col-span-1">
@@ -456,10 +400,6 @@ export default function PDFGeneratorPage({
                 <TabsTrigger value="preview">
                   <Eye className="h-4 w-4 mr-2" />
                   PDF Preview
-                </TabsTrigger>
-                <TabsTrigger value="sections">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Message Sections
                 </TabsTrigger>
                 <TabsTrigger value="raw">
                   <FileText className="h-4 w-4 mr-2" />
