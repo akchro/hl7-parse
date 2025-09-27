@@ -22,6 +22,7 @@ import { Route as authSignInRouteImport } from './routes/(auth)/sign-in'
 import { Route as authOtpRouteImport } from './routes/(auth)/otp'
 import { Route as authForgotPasswordRouteImport } from './routes/(auth)/forgot-password'
 import { Route as AuthenticatedSettingsRouteRouteImport } from './routes/_authenticated/settings/route'
+import { Route as AuthenticatedWorkflowIndexRouteImport } from './routes/_authenticated/workflow/index'
 import { Route as AuthenticatedUsersIndexRouteImport } from './routes/_authenticated/users/index'
 import { Route as AuthenticatedTasksIndexRouteImport } from './routes/_authenticated/tasks/index'
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
@@ -32,6 +33,10 @@ import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authentica
 import { Route as UnauthenticatedHomeSolutionRouteImport } from './routes/_unauthenticated/home/solution'
 import { Route as UnauthenticatedHomeProblemRouteImport } from './routes/_unauthenticated/home/problem'
 import { Route as UnauthenticatedHomeDemoRouteImport } from './routes/_unauthenticated/home/demo'
+import { Route as AuthenticatedWorkflowUpdateRouteImport } from './routes/_authenticated/workflow/update'
+import { Route as AuthenticatedWorkflowReturnRouteImport } from './routes/_authenticated/workflow/return'
+import { Route as AuthenticatedWorkflowPdfRouteImport } from './routes/_authenticated/workflow/pdf'
+import { Route as AuthenticatedWorkflowAnalyticsRouteImport } from './routes/_authenticated/workflow/analytics'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
@@ -108,6 +113,12 @@ const AuthenticatedSettingsRouteRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedWorkflowIndexRoute =
+  AuthenticatedWorkflowIndexRouteImport.update({
+    id: '/workflow/',
+    path: '/workflow/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedUsersIndexRoute = AuthenticatedUsersIndexRouteImport.update({
   id: '/users/',
   path: '/users/',
@@ -162,6 +173,30 @@ const UnauthenticatedHomeDemoRoute = UnauthenticatedHomeDemoRouteImport.update({
   path: '/home/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedWorkflowUpdateRoute =
+  AuthenticatedWorkflowUpdateRouteImport.update({
+    id: '/workflow/update',
+    path: '/workflow/update',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkflowReturnRoute =
+  AuthenticatedWorkflowReturnRouteImport.update({
+    id: '/workflow/return',
+    path: '/workflow/return',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkflowPdfRoute =
+  AuthenticatedWorkflowPdfRouteImport.update({
+    id: '/workflow/pdf',
+    path: '/workflow/pdf',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedWorkflowAnalyticsRoute =
+  AuthenticatedWorkflowAnalyticsRouteImport.update({
+    id: '/workflow/analytics',
+    path: '/workflow/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSettingsNotificationsRoute =
   AuthenticatedSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -240,6 +275,10 @@ export interface FileRoutesByFullPath {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/workflow/analytics': typeof AuthenticatedWorkflowAnalyticsRoute
+  '/workflow/pdf': typeof AuthenticatedWorkflowPdfRoute
+  '/workflow/return': typeof AuthenticatedWorkflowReturnRoute
+  '/workflow/update': typeof AuthenticatedWorkflowUpdateRoute
   '/home/demo': typeof UnauthenticatedHomeDemoRoute
   '/home/problem': typeof UnauthenticatedHomeProblemRoute
   '/home/solution': typeof UnauthenticatedHomeSolutionRoute
@@ -250,6 +289,7 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/workflow': typeof AuthenticatedWorkflowIndexRoute
   '/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
   '/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
   '/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
@@ -273,6 +313,10 @@ export interface FileRoutesByTo {
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/workflow/analytics': typeof AuthenticatedWorkflowAnalyticsRoute
+  '/workflow/pdf': typeof AuthenticatedWorkflowPdfRoute
+  '/workflow/return': typeof AuthenticatedWorkflowReturnRoute
+  '/workflow/update': typeof AuthenticatedWorkflowUpdateRoute
   '/home/demo': typeof UnauthenticatedHomeDemoRoute
   '/home/problem': typeof UnauthenticatedHomeProblemRoute
   '/home/solution': typeof UnauthenticatedHomeSolutionRoute
@@ -283,6 +327,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsIndexRoute
   '/tasks': typeof AuthenticatedTasksIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/workflow': typeof AuthenticatedWorkflowIndexRoute
   '/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
   '/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
   '/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
@@ -309,6 +354,10 @@ export interface FileRoutesById {
   '/_authenticated/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
+  '/_authenticated/workflow/analytics': typeof AuthenticatedWorkflowAnalyticsRoute
+  '/_authenticated/workflow/pdf': typeof AuthenticatedWorkflowPdfRoute
+  '/_authenticated/workflow/return': typeof AuthenticatedWorkflowReturnRoute
+  '/_authenticated/workflow/update': typeof AuthenticatedWorkflowUpdateRoute
   '/_unauthenticated/home/demo': typeof UnauthenticatedHomeDemoRoute
   '/_unauthenticated/home/problem': typeof UnauthenticatedHomeProblemRoute
   '/_unauthenticated/home/solution': typeof UnauthenticatedHomeSolutionRoute
@@ -319,6 +368,7 @@ export interface FileRoutesById {
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
   '/_authenticated/tasks/': typeof AuthenticatedTasksIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/workflow/': typeof AuthenticatedWorkflowIndexRoute
   '/_unauthenticated/home/features/edit': typeof UnauthenticatedHomeFeaturesEditRoute
   '/_unauthenticated/home/features/export': typeof UnauthenticatedHomeFeaturesExportRoute
   '/_unauthenticated/home/features/translation': typeof UnauthenticatedHomeFeaturesTranslationRoute
@@ -345,6 +395,10 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/workflow/analytics'
+    | '/workflow/pdf'
+    | '/workflow/return'
+    | '/workflow/update'
     | '/home/demo'
     | '/home/problem'
     | '/home/solution'
@@ -355,6 +409,7 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/tasks'
     | '/users'
+    | '/workflow'
     | '/home/features/edit'
     | '/home/features/export'
     | '/home/features/translation'
@@ -378,6 +433,10 @@ export interface FileRouteTypes {
     | '/settings/appearance'
     | '/settings/display'
     | '/settings/notifications'
+    | '/workflow/analytics'
+    | '/workflow/pdf'
+    | '/workflow/return'
+    | '/workflow/update'
     | '/home/demo'
     | '/home/problem'
     | '/home/solution'
@@ -388,6 +447,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/tasks'
     | '/users'
+    | '/workflow'
     | '/home/features/edit'
     | '/home/features/export'
     | '/home/features/translation'
@@ -413,6 +473,10 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/appearance'
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
+    | '/_authenticated/workflow/analytics'
+    | '/_authenticated/workflow/pdf'
+    | '/_authenticated/workflow/return'
+    | '/_authenticated/workflow/update'
     | '/_unauthenticated/home/demo'
     | '/_unauthenticated/home/problem'
     | '/_unauthenticated/home/solution'
@@ -423,6 +487,7 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/'
     | '/_authenticated/tasks/'
     | '/_authenticated/users/'
+    | '/_authenticated/workflow/'
     | '/_unauthenticated/home/features/edit'
     | '/_unauthenticated/home/features/export'
     | '/_unauthenticated/home/features/translation'
@@ -546,6 +611,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/workflow/': {
+      id: '/_authenticated/workflow/'
+      path: '/workflow'
+      fullPath: '/workflow'
+      preLoaderRoute: typeof AuthenticatedWorkflowIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
@@ -615,6 +687,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/home/demo'
       preLoaderRoute: typeof UnauthenticatedHomeDemoRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/workflow/update': {
+      id: '/_authenticated/workflow/update'
+      path: '/workflow/update'
+      fullPath: '/workflow/update'
+      preLoaderRoute: typeof AuthenticatedWorkflowUpdateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workflow/return': {
+      id: '/_authenticated/workflow/return'
+      path: '/workflow/return'
+      fullPath: '/workflow/return'
+      preLoaderRoute: typeof AuthenticatedWorkflowReturnRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workflow/pdf': {
+      id: '/_authenticated/workflow/pdf'
+      path: '/workflow/pdf'
+      fullPath: '/workflow/pdf'
+      preLoaderRoute: typeof AuthenticatedWorkflowPdfRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/workflow/analytics': {
+      id: '/_authenticated/workflow/analytics'
+      path: '/workflow/analytics'
+      fullPath: '/workflow/analytics'
+      preLoaderRoute: typeof AuthenticatedWorkflowAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/settings/notifications': {
       id: '/_authenticated/settings/notifications'
@@ -714,24 +814,34 @@ const AuthenticatedSettingsRouteRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
+  AuthenticatedWorkflowAnalyticsRoute: typeof AuthenticatedWorkflowAnalyticsRoute
+  AuthenticatedWorkflowPdfRoute: typeof AuthenticatedWorkflowPdfRoute
+  AuthenticatedWorkflowReturnRoute: typeof AuthenticatedWorkflowReturnRoute
+  AuthenticatedWorkflowUpdateRoute: typeof AuthenticatedWorkflowUpdateRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedDashIndexRoute: typeof AuthenticatedDashIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
   AuthenticatedTasksIndexRoute: typeof AuthenticatedTasksIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedWorkflowIndexRoute: typeof AuthenticatedWorkflowIndexRoute
   AuthenticatedDashConnectionsIndexRoute: typeof AuthenticatedDashConnectionsIndexRoute
   AuthenticatedDashResumesIndexRoute: typeof AuthenticatedDashResumesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
+  AuthenticatedWorkflowAnalyticsRoute: AuthenticatedWorkflowAnalyticsRoute,
+  AuthenticatedWorkflowPdfRoute: AuthenticatedWorkflowPdfRoute,
+  AuthenticatedWorkflowReturnRoute: AuthenticatedWorkflowReturnRoute,
+  AuthenticatedWorkflowUpdateRoute: AuthenticatedWorkflowUpdateRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedDashIndexRoute: AuthenticatedDashIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
   AuthenticatedTasksIndexRoute: AuthenticatedTasksIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedWorkflowIndexRoute: AuthenticatedWorkflowIndexRoute,
   AuthenticatedDashConnectionsIndexRoute:
     AuthenticatedDashConnectionsIndexRoute,
   AuthenticatedDashResumesIndexRoute: AuthenticatedDashResumesIndexRoute,
