@@ -1,9 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { Analytics } from '@/features/workflow/analytics'
 
-export const Route = createFileRoute('/_authenticated/workflow/analytics')({
-  component: RouteComponent,
+export const Route = createFileRoute('/_authenticated/workflow/')({
+  component: Analytics,
 })
 
-function RouteComponent() {
-  return <div>Hello "/_authenticated/workflow/analytics"!</div>
-}

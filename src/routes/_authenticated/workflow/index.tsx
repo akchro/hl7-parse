@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Conversion from '@/features/dashboard/workflow/conversion'
+import { Patients } from '@/features/workflow/patients'
 
 export const Route = createFileRoute('/_authenticated/workflow/')({
-  component: Conversion,
+  component: Patients,
 })
 
