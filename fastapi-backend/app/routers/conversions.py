@@ -45,6 +45,11 @@ async def save_conversion(
             original_hl7_content=request.hl7_content,
             json_content=request.json_content,
             xml_content=request.xml_content,
+            plain_english=request.plain_english,
+            latex_content=request.latex_content,
+            html_content=request.html_content,
+            pdf_base64=request.pdf_base64,
+            patient_name=request.patient_name,
             conversion_metadata=request.conversion_metadata,
             title=request.title,
             description=request.description,
@@ -88,6 +93,7 @@ async def list_saved_conversions(
     page: int = Query(1, ge=1, description="Page number (starts from 1)"),
     per_page: int = Query(10, ge=1, le=100, description="Number of items per page"),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    patient_name: Optional[str] = Query(None, description="Filter by patient name"),
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -101,6 +107,10 @@ async def list_saved_conversions(
         if user_id:
             query = query.where(SavedConversion.user_id == user_id)
         
+        # Add patient name filter if provided
+        if patient_name:
+            query = query.where(SavedConversion.patient_name.ilike(f"%{patient_name}%"))
+        
         # Add ordering (newest first)
         query = query.order_by(SavedConversion.created_at.desc())
         
@@ -108,6 +118,8 @@ async def list_saved_conversions(
         count_query = select(func.count(SavedConversion.id))
         if user_id:
             count_query = count_query.where(SavedConversion.user_id == user_id)
+        if patient_name:
+            count_query = count_query.where(SavedConversion.patient_name.ilike(f"%{patient_name}%"))
         
         total_result = await db.execute(count_query)
         total = total_result.scalar()
@@ -129,6 +141,11 @@ async def list_saved_conversions(
                 original_hl7_content=conv.original_hl7_content,
                 json_content=conv.json_content,
                 xml_content=conv.xml_content,
+                plain_english=conv.plain_english,
+                latex_content=conv.latex_content,
+                html_content=conv.html_content,
+                pdf_base64=conv.pdf_base64,
+                patient_name=conv.patient_name,
                 conversion_metadata=conv.conversion_metadata,
                 user_id=conv.user_id,
                 created_at=conv.created_at,
@@ -178,6 +195,11 @@ async def get_saved_conversion(
             original_hl7_content=conversion.original_hl7_content,
             json_content=conversion.json_content,
             xml_content=conversion.xml_content,
+            plain_english=conversion.plain_english,
+            latex_content=conversion.latex_content,
+            html_content=conversion.html_content,
+            pdf_base64=conversion.pdf_base64,
+            patient_name=conversion.patient_name,
             conversion_metadata=conversion.conversion_metadata,
             user_id=conversion.user_id,
             created_at=conversion.created_at,

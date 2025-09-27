@@ -98,6 +98,15 @@ class SavedConversion(Base):
     json_content = Column(JSONB)
     xml_content = Column(Text)
     
+    # Medical document formats
+    plain_english = Column(Text)
+    latex_content = Column(Text)
+    html_content = Column(Text)
+    pdf_base64 = Column(Text)
+    
+    # Patient information for easy filtering
+    patient_name = Column(String(200))  # For filtering by patient
+    
     # Metadata
     conversion_metadata = Column(JSONB)  # Store metadata from both conversions
     

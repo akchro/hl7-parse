@@ -34,6 +34,33 @@ interface ConversionResult {
   medicalDocument?: MedicalDocumentResult;
 }
 
+// Helper function to extract patient name from HL7 content
+const extractPatientName = (hl7Content: string): string | null => {
+  try {
+    const lines = hl7Content.split('\n');
+    const pidLine = lines.find(line => line.startsWith('PID|'));
+    
+    if (pidLine) {
+      const fields = pidLine.split('|');
+      // PID segment field 5 contains patient name (format: LAST^FIRST^MIDDLE^^PREFIX^)
+      if (fields.length > 5 && fields[5]) {
+        const nameParts = fields[5].split('^');
+        const lastName = nameParts[0] || '';
+        const firstName = nameParts[1] || '';
+        const middleName = nameParts[2] || '';
+        
+        if (firstName || lastName) {
+          return [firstName, middleName, lastName].filter(Boolean).join(' ').trim();
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    console.warn('Error extracting patient name from HL7:', error);
+    return null;
+  }
+};
+
 export default function HL7MedicalConverter() {
   const [hl7Input, setHl7Input] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -234,6 +261,9 @@ export default function HL7MedicalConverter() {
     setError(null);
 
     try {
+      // Extract patient name from HL7 content
+      const patientName = extractPatientName(hl7Input);
+      
       const saveData = {
         hl7_content: hl7Input,
         json_content: result.json?.success ? result.json.content : null,
@@ -242,6 +272,7 @@ export default function HL7MedicalConverter() {
         latex_content: result.medicalDocument?.latex,
         html_content: result.medicalDocument?.html,
         pdf_base64: result.medicalDocument?.pdfBase64,
+        patient_name: patientName,
         conversion_metadata: {
           json_metadata: result.json?.metadata,
           xml_metadata: result.xml?.metadata,
@@ -260,7 +291,13 @@ export default function HL7MedicalConverter() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        if (response.status === 409) {
+          setError('This HL7 message has already been saved. Each HL7 message can only be saved once to prevent duplicates.');
+          return;
+        } else {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
       }
 
       const responseData = await response.json();
@@ -275,7 +312,15 @@ export default function HL7MedicalConverter() {
       }
     } catch (err) {
       console.error('Save error:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred while saving');
+      if (err instanceof Error) {
+        if (err.message.includes('409')) {
+          setError('This HL7 message has already been saved. Each HL7 message can only be saved once to prevent duplicates.');
+        } else {
+          setError(err.message);
+        }
+      } else {
+        setError('An unexpected error occurred while saving');
+      }
     } finally {
       setIsSaving(false);
     }
