@@ -5,8 +5,8 @@ Handles communication with Mastra agents for HL7 processing
 
 import httpx
 import asyncio
+import os
 from typing import Dict, Any, Optional
-from app.config import settings
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,106 +15,92 @@ class MastraService:
     """Service for interacting with Mastra AI agents"""
     
     def __init__(self):
-        self.mastra_endpoint = settings.MASTRA_ENDPOINT
-        self.timeout = settings.PROCESS_TIMEOUT
+        self.mastra_endpoint = os.getenv("MASTRA_SERVICE_URL", "http://localhost:3001")
+        self.timeout = 60.0
         
+    async def convert_hl7_to_json(self, hl7_content: str) -> Dict[str, Any]:
+        """
+        Convert HL7 message to JSON using Mastra service
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7/json",
+                    json={"hl7Content": hl7_content}
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra JSON conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra JSON conversion: {e}")
+            raise
+    
+    async def convert_hl7_to_xml(self, hl7_content: str) -> Dict[str, Any]:
+        """
+        Convert HL7 message to XML using Mastra service
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7/xml",
+                    json={"hl7Content": hl7_content}
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra XML conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra XML conversion: {e}")
+            raise
+    
+    async def convert_hl7_both_formats(self, hl7_content: str) -> Dict[str, Any]:
+        """
+        Convert HL7 message to both JSON and XML using Mastra service
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7",
+                    json={"hl7Content": hl7_content}
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra conversion: {e}")
+            raise
+    
     async def process_hl7_message(self, hl7_content: str) -> Dict[str, Any]:
         """
-        Process HL7 message using Mastra agents
+        Process HL7 message using Mastra agents - legacy method for compatibility
         Returns: Dict with 'xml', 'json', and 'pdf' keys
         """
         try:
-            # Run both agents in parallel
-            xml_json_task = self._convert_to_structured_formats(hl7_content)
-            pdf_task = self._convert_to_pdf_format(hl7_content)
+            # Use the new dual conversion method
+            result = await self.convert_hl7_both_formats(hl7_content)
             
-            # Wait for both tasks to complete
-            xml_json_result, pdf_result = await asyncio.gather(
-                xml_json_task,
-                pdf_task,
-                return_exceptions=True
-            )
-            
-            results = {}
-            
-            # Handle XML/JSON results
-            if isinstance(xml_json_result, Exception):
-                logger.error(f"XML/JSON conversion failed: {xml_json_result}")
-                results.update({"xml": None, "json": None})
+            # Extract the data from the nested response structure
+            if result.get("success") and result.get("data"):
+                data = result["data"]
+                json_result = data.get("jsonResult", {})
+                xml_result = data.get("xmlResult", {})
+                
+                return {
+                    "json": json_result.get("data") if json_result.get("success") else None,
+                    "xml": xml_result.get("data") if xml_result.get("success") else None,
+                    "pdf": None  # PDF generation not implemented in new Mastra service
+                }
             else:
-                results.update(xml_json_result)
-            
-            # Handle PDF results
-            if isinstance(pdf_result, Exception):
-                logger.error(f"PDF conversion failed: {pdf_result}")
-                results["pdf"] = None
-            else:
-                results["pdf"] = pdf_result
-            
-            return results
-            
+                return {"json": None, "xml": None, "pdf": None}
+                
         except Exception as e:
             logger.error(f"Error in Mastra processing: {e}")
-            return {"xml": None, "json": None, "pdf": None}
-    
-    async def _convert_to_structured_formats(self, hl7_content: str) -> Dict[str, Any]:
-        """
-        Convert HL7 to XML and JSON using Mastra structured data agent
-        """
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    f"{self.mastra_endpoint}/agents/hl7-to-structured",
-                    json={
-                        "hl7_content": hl7_content,
-                        "output_formats": ["xml", "json"]
-                    }
-                )
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    return {
-                        "xml": result.get("xml"),
-                        "json": result.get("json")
-                    }
-                else:
-                    logger.error(f"Mastra XML/JSON conversion failed: {response.status_code} - {response.text}")
-                    return {"xml": None, "json": None}
-                    
-        except httpx.TimeoutException:
-            logger.error("Timeout calling Mastra XML/JSON conversion service")
-            return {"xml": None, "json": None}
-        except Exception as e:
-            logger.error(f"Error calling Mastra XML/JSON service: {e}")
-            return {"xml": None, "json": None}
-    
-    async def _convert_to_pdf_format(self, hl7_content: str) -> Optional[bytes]:
-        """
-        Convert HL7 to PDF using Mastra PDF generation agent
-        """
-        try:
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.post(
-                    f"{self.mastra_endpoint}/agents/hl7-to-pdf",
-                    json={
-                        "hl7_content": hl7_content,
-                        "format": "latex"
-                    }
-                )
-                
-                if response.status_code == 200:
-                    # Assuming the PDF is returned as bytes
-                    return response.content
-                else:
-                    logger.error(f"Mastra PDF conversion failed: {response.status_code} - {response.text}")
-                    return None
-                    
-        except httpx.TimeoutException:
-            logger.error("Timeout calling Mastra PDF conversion service")
-            return None
-        except Exception as e:
-            logger.error(f"Error calling Mastra PDF service: {e}")
-            return None
+            return {"json": None, "xml": None, "pdf": None}
     
     async def health_check(self) -> bool:
         """
@@ -133,10 +119,10 @@ class MastraService:
         """
         try:
             async with httpx.AsyncClient(timeout=10) as client:
-                response = await client.get(f"{self.mastra_endpoint}/agents/{agent_name}/status")
+                response = await client.get(f"{self.mastra_endpoint}/health")
                 
                 if response.status_code == 200:
-                    return response.json()
+                    return {"status": "active", "service": "mastra-hl7-service"}
                 else:
                     return {"status": "unknown", "error": f"HTTP {response.status_code}"}
                     
@@ -146,6 +132,39 @@ class MastraService:
 # Mock implementation for testing when Mastra is not available
 class MockMastraService(MastraService):
     """Mock Mastra service for development/testing"""
+    
+    async def convert_hl7_to_json(self, hl7_content: str) -> Dict[str, Any]:
+        """Mock JSON conversion"""
+        await asyncio.sleep(1)
+        return {
+            "success": True,
+            "data": self._generate_mock_json(hl7_content)
+        }
+    
+    async def convert_hl7_to_xml(self, hl7_content: str) -> Dict[str, Any]:
+        """Mock XML conversion"""
+        await asyncio.sleep(1)
+        return {
+            "success": True,
+            "data": self._generate_mock_xml(hl7_content)
+        }
+    
+    async def convert_hl7_both_formats(self, hl7_content: str) -> Dict[str, Any]:
+        """Mock both formats conversion"""
+        await asyncio.sleep(2)
+        return {
+            "success": True,
+            "data": {
+                "jsonResult": {
+                    "success": True,
+                    "data": self._generate_mock_json(hl7_content)
+                },
+                "xmlResult": {
+                    "success": True,
+                    "data": self._generate_mock_xml(hl7_content)
+                }
+            }
+        }
     
     async def process_hl7_message(self, hl7_content: str) -> Dict[str, Any]:
         """

@@ -4,7 +4,10 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:docs.mastra.ai)",
       "WebFetch(domain:mastra.ai)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(docker logs:*)",
+      "Bash(docker-compose:*)",
+      "Bash(docker-compose up:*)"
     ],
     "deny": []
   }

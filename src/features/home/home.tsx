@@ -26,7 +26,6 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Footer } from "@/components/footer"
 import { Navbar } from "@/components/home-bar"
-import { Link } from "@tanstack/react-router"
 
 const fadeIn = {
   hidden: { opacity: 0 },

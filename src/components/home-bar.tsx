@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Book, Newspaper, PenSquare, Info } from 'lucide-react'
+import { Menu, X, ChevronDown, Book, Newspaper } from 'lucide-react'
 import { ThemeSwitch } from './theme-switch'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -53,13 +53,6 @@ export function Navbar() {
             activeProps={{ className: "font-medium" }}
           >
             Home
-          </Link>
-          <Link 
-            to="/about" 
-            className="text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium"
-            activeProps={{ className: "font-medium" }}
-          >
-            About
           </Link>
 
           {/* Resources Dropdown */}
@@ -124,14 +117,6 @@ export function Navbar() {
                 activeProps={{ className: "font-medium" }}
               >
                 Home
-              </Link>
-              <Link
-                to="/about"
-                className="block py-2 text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium"
-                onClick={() => setMobileMenuOpen(false)}
-                activeProps={{ className: "font-medium" }}
-              >
-                About
               </Link>
 
               <Drawer>

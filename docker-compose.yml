@@ -10,10 +10,27 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./fastapi-backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 180s
+      timeout: 10s
+      retries: 5
+
+  mastra-service:
+    build:
+      context: ./mastra-service
+      dockerfile: Dockerfile
+    container_name: hl7-mastra
+    environment:
+      GOOGLE_GENERATIVE_AI_API_KEY: AIzaSyAOmh0Jegw90UjzF-nDy4c3PAIFMVE5Z6Q
+      PORT: 3001
+      NODE_ENV: production
+    ports:
+      - "3001:3001"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      interval: 30s
       timeout: 10s
       retries: 5
 
@@ -23,7 +40,8 @@ services:
       dockerfile: Dockerfile
     container_name: hl7-backend
     environment:
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/hl7_db
+      DATABASE_URL: postgresql://postgres:postgres@hl7-postgres:5432/hl7_db
+      MASTRA_SERVICE_URL: http://hl7-mastra:3001
       PYTHONPATH: /app
     volumes:
       - ./fastapi-backend/uploads:/app/uploads
@@ -31,8 +49,35 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - hl7-postgres
+      hl7-postgres:
+        condition: service_healthy
+      mastra-service:
+        condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hl7-frontend
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./vite.config.ts:/app/vite.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.app.json:/app/tsconfig.app.json
+      - ./tsconfig.node.json:/app/tsconfig.node.json
+      - ./tailwind.config.js:/app/tailwind.config.js
+      - ./components.json:/app/components.json
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://backend:8000
+    command: npm run dev -- --host 0.0.0.0
+    depends_on:
+      - backend
 
   nginx:
     image: nginx:alpine
@@ -42,6 +87,7 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
+      - frontend
       - backend
 
 volumes:
