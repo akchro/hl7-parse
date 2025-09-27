@@ -15,7 +15,7 @@ END
 $do$;
 
 -- Grant privileges
-GRANT ALL PRIVILEGES ON DATABASE hl7_liteboard TO hl7user;
+GRANT ALL PRIVILEGES ON DATABASE hl7_db TO hl7user;
 GRANT ALL ON SCHEMA public TO hl7user;
 
 -- Enable UUID extension

@@ -1,23 +1,15 @@
 import {
-  IconBarrierBlock,
   IconBrowserCheck,
-  IconBug,
   IconChecklist,
-  IconError404,
   IconHelp,
   IconLayoutDashboard,
-  IconLock,
-  IconLockAccess,
-  IconMessages,
   IconNotification,
-  IconPackages,
   IconPalette,
-  IconServerOff,
   IconSettings,
   IconTool,
   IconUserCog,
-  IconUserOff,
   IconUsers,
+  IconTransform,
 } from '@tabler/icons-react'
 import { AudioWaveform, Command, GalleryVerticalEnd } from 'lucide-react'
 import { type SidebarData } from '../types'
@@ -47,13 +39,23 @@ export const sidebarData: SidebarData = {
   ],
   navGroups: [
     {
-      title: 'Core',
+      title: 'HL7 Tools',
       items: [
+        {
+          title: 'HL7 Converter',
+          url: '/hl7-converter',
+          icon: IconTransform,
+        },
         {
           title: 'Dashboard',
           url: '/dash',
           icon: IconLayoutDashboard,
         },
+      ],
+    },
+    {
+      title: 'Core',
+      items: [
         {
           title: 'Resume Library',
           url: '/dash/resumes',

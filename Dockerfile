@@ -1,27 +1,17 @@
-# Multi-stage build for React frontend
-FROM node:20-alpine AS frontend-build
+# Development build for React frontend
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci
 
 # Copy source code
 COPY . .
 
-# Build the application
-RUN npm run build
+# Expose development server port
+EXPOSE 5173
 
-# Production stage with nginx
-FROM nginx:alpine AS frontend-production
-
-# Copy built assets
-COPY --from=frontend-build /app/dist /usr/share/nginx/html
-
-# Copy nginx configuration
-COPY nginx.conf /etc/nginx/nginx.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Start development server
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
