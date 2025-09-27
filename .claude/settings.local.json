@@ -11,7 +11,8 @@
       "Bash(docker exec:*)",
       "Bash(curl:*)",
       "Bash(docker restart:*)",
-      "Bash(lsof:*)"
+      "Bash(lsof:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
