@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { 
   Heart,
   Zap,
-  Shield,
   FileText,
   Clock,
   Mail,

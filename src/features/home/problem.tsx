@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import {
-  FileText,
   Users,
   Clock,
   DollarSign,
@@ -11,8 +10,6 @@ import {
   Brain,
   ArrowRight,
   BarChart3,
-  Shield,
-  Database,
   MessageSquare
 } from "lucide-react"
 import { Button } from "@/components/ui/button"

@@ -102,13 +102,6 @@ export default function RealTimeEditingPage() {
     }
   ]
 
-  const workflowBenefits = [
-    { metric: "70%", description: "Faster data correction" },
-    { metric: "100%", description: "Edit audit compliance" },
-    { metric: "<2s", description: "HL7 regeneration time" },
-    { metric: "0", description: "IT tickets for simple edits" }
-  ]
-
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Navbar */}

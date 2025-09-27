@@ -9,7 +9,6 @@ import {
   CheckCircle,
   ArrowRight,
   Play,
-  Zap,
   FileCode,
   FileArchive
 } from "lucide-react"
@@ -83,13 +82,6 @@ export default function SecureExportPage() {
       useCase: "Legacy system compatibility, HL7/FHIR compliance",
       icon: <FileArchive className="h-5 w-5" />
     }
-  ]
-
-  const securityMetrics = [
-    { metric: "AES-256", description: "Encryption standard" },
-    { metric: "100%", description: "HIPAA compliant" },
-    { metric: "<5s", description: "Export generation" },
-    { metric: "0", description: "Manual steps required" }
   ]
 
   return (

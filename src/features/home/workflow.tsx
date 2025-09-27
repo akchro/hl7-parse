@@ -3,7 +3,6 @@
 import { motion } from "framer-motion"
 import {
   TrendingUp,
-  Clock,
   Users,
   Zap,
   ArrowRight,
@@ -64,31 +63,6 @@ export default function WorkflowOptimizationPage() {
       icon: <Target className="h-6 w-6" />,
       title: "Task Automation",
       description: "Automate repetitive data entry and validation tasks"
-    }
-  ]
-
-  const efficiencyMetrics = [
-    { metric: "60%", description: "Faster patient intake" },
-    { metric: "45%", description: "Reduced discharge time" },
-    { metric: "80%", description: "Less manual entry" },
-    { metric: "100%", description: "Staff satisfaction" }
-  ]
-
-  const workflowAreas = [
-    {
-      area: "Patient Admission",
-      improvement: "Automated registration from HL7 ADT messages",
-      icon: <Users className="h-5 w-5" />
-    },
-    {
-      area: "Clinical Documentation",
-      improvement: "Real-time updates and auto-populated fields",
-      icon: <BarChart className="h-5 w-5" />
-    },
-    {
-      area: "Discharge Process",
-      improvement: "Instant report generation and data synchronization",
-      icon: <RefreshCw className="h-5 w-5" />
     }
   ]
 

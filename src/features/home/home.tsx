@@ -10,7 +10,6 @@ import {
   DollarSign,
   Users,
   ArrowRight,
-  CheckCircle,
   Play,
   Download,
   Edit,

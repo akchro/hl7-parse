@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion"
 import {
-  Heart,
   Zap,
   Shield,
   FileText,
@@ -12,8 +11,6 @@ import {
   Eye,
   Download,
   CheckCircle,
-  Clock,
-  Users
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -100,13 +97,6 @@ export default function HL7TranslationPage() {
       description: "Appointment and resource scheduling",
       examples: ["S12 - New Appointment", "S13 - Cancel Appointment", "S14 - Modify Appointment"]
     }
-  ]
-
-  const benefits = [
-    { metric: "95%", description: "Reduction in HL7 interpretation time" },
-    { metric: "100%", description: "Message format compatibility" },
-    { metric: "<1s", description: "Average translation speed" },
-    { metric: "0", description: "Technical expertise required" }
   ]
 
   return (

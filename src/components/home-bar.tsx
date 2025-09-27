@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, ChevronDown, Heart, Zap, Shield, FileText, Info, Play } from 'lucide-react'
+import { Menu, X, ChevronDown, Heart, Zap, Shield, FileText, Play } from 'lucide-react'
 import { ThemeSwitch } from './theme-switch'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
