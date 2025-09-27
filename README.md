@@ -1,134 +1,94 @@
 # HL7 LiteBoard
 
-A lightweight, clinician-friendly solution that ingests HL7 data streams and presents them in a digestible, editable, and exportable format. The platform translates complex HL7 v2 messages into clean, interactive formats (XML, JSON, PDF) using AI-powered conversion.
+A lightweight, clinician-friendly solution that ingests HL7 data streams and presents them in a digestible, editable, and exportable format. Built for healthcare professionals to bridge the gap between complex HL7 standards and daily clinical workflows. The platform also supports AI-powered conversion into clean, interactive formats (XML, JSON, PDF).
 
-## 🚀 Quick Start
+---
 
-```bash
-# Start the complete system
-./start.sh
+## 🚀 Overview
 
-# Or with monitoring stack
-./start.sh --monitoring
+HL7 LiteBoard translates complex HL7 v2 messages into a clean, interactive dashboard, allowing healthcare professionals to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML).  
+This tool reduces intake and discharge times while lowering integration costs for healthcare systems.
 
-# Or with everything
-./start.sh --all
-```
+---
+
+## 🏥 Problem Statement
+
+- **Complexity of HL7**: HL7 v2 is the backbone of healthcare interoperability, but its structure is highly technical and difficult for non-technical users to interpret.  
+- **Cost of Integration**: Hospitals spend significant resources on interface engines and consultants to manage HL7 data.  
+- **Workflow Inefficiencies**: Patient intake and discharge involve multiple handoffs, resulting in delays, redundant data entry, and errors.  
+- **Accessibility Gap**: Non-technical healthcare staff cannot easily read, update, or act on HL7 data without IT involvement.  
+
+---
+
+## 💡 Solution
+
+HL7 LiteBoard provides a simplified interface that:
+
+- **Ingests** HL7 v2 messages (e.g., ADT for admissions, ORU for labs).  
+- **Transforms** and displays patient information in an intuitive dashboard.  
+- **Enables** real-time edits to key fields (allergies, medications, discharge notes).  
+- **Generates** updated HL7/FHIR messages to maintain interoperability.  
+- **Provides** one-click export in PDF, JSON, or XML formats for easy sharing and record-keeping.  
+
+This system acts as a translation and interaction layer between hospital systems and healthcare professionals, improving usability without requiring deep technical expertise.
+
+---
 
 ## 📋 System Overview
 
 ### Core Components
-
-- **FastAPI Backend** (Port 8000) - HL7 processing API with comprehensive endpoints
-- **PostgreSQL Database** (Port 5432) - Complete HL7 data schema with audit trails  
-- **Mock Mastra Service** (Port 3001) - AI agent simulation for format conversion
-- **pgAdmin** (Port 8080) - Database management interface
+- **FastAPI Backend** (Port 8000) – HL7 processing API with comprehensive endpoints  
+- **PostgreSQL Database** (Port 5432) – HL7 schema with audit trails  
+- **Mock Mastra Service** (Port 3001) – AI agent simulation for format conversion  
+- **pgAdmin** (Port 8080) – Database management interface  
 
 ### Optional Components (via profiles)
+- **Prometheus** (Port 9090) – Metrics collection  
+- **Grafana** (Port 3000) – Dashboards and visualization  
+- **React Frontend** (Port 80) – Web UI (future)  
 
-- **Prometheus** (Port 9090) - Metrics collection and monitoring
-- **Grafana** (Port 3000) - Dashboards and visualization
-- **React Frontend** (Port 80) - User interface (future)
+---
 
 ## 🏗️ Architecture
 
 ```
+
 HL7 File Upload → FastAPI → Database Storage → Mastra AI → Multi-format Output
-     ↓              ↓            ↓              ↓            ↓
-   Validation    Processing    PostgreSQL   XML/JSON/PDF   Frontend Access
-```
+↓              ↓            ↓              ↓            ↓
+Validation    Processing    PostgreSQL   XML/JSON/PDF   Frontend Access
 
-## 🧪 Testing
+````
 
-### Automated Testing
+LiteBoard also acts as middleware:  
+1. **Receives** HL7 v2 messages from hospital systems  
+2. **Parses** and transforms data into structured JSON  
+3. **Presents** information via a web interface  
+4. **Captures** clinician updates and modifications  
+5. **Generates** updated HL7/FHIR messages for system integration  
+
+---
+
+## 🚀 Quick Start
+
 ```bash
-# Run comprehensive API tests
-./fastapi-backend/test-endpoints.sh
-```
+# Clone the repository
+git clone https://github.com/your-username/hl7-liteboard.git
+cd hl7-liteboard
+````
 
-### Quick Manual Tests
+### Option 1: Development (Node.js frontend)
+
 ```bash
-# Process all sample files
-curl -X POST http://localhost:8000/api/v1/samples/process-all
+# Install dependencies
+npm install
 
-# Check processing stats
-curl http://localhost:8000/api/v1/browse/stats
-
-# Upload HL7 text
-curl -X POST http://localhost:8000/api/v1/upload/hl7/text \
-  -H "Content-Type: application/json" \
-  -d '{"hl7_content": "MSH|^~\\&|TEST|...", "filename": "test.hl7"}'
+# Start development server
+npm run dev
 ```
 
-## 📊 Access Points
+The app will be available at `http://localhost:5173`.
 
-- **API Documentation**: http://localhost:8000/docs
-- **Backend Health**: http://localhost:8000/health  
-- **Database Admin**: http://localhost:8080 (admin@hl7liteboard.com / admin123)
-- **Mock Mastra**: http://localhost:3001/health
-
-## 🔧 Development
-
-### Project Structure
-```
-hl7-parse/
-├── fastapi-backend/         # FastAPI application
-│   ├── app/                # Application code
-│   ├── sample_files/       # 4 realistic HL7 samples
-│   ├── mock-mastra/        # Mock AI service
-│   └── Dockerfile          # Backend container
-├── docker-compose.yml      # Single compose file
-└── start.sh               # Unified startup script
-```
-
-### Sample HL7 Files Included
-- **adt_admission.hl7** - Patient admission with allergies
-- **oru_lab_results.hl7** - Laboratory results (CBC, metabolic panel)
-- **orm_medication_order.hl7** - Medication orders  
-- **adt_discharge.hl7** - Patient discharge with procedures
-
-### Key Features Implemented
-✅ HL7 v2 message parsing and validation  
-✅ Multi-format conversion (XML, JSON, PDF) via AI  
-✅ Background processing with status tracking  
-✅ Comprehensive REST API with OpenAPI docs  
-✅ Database storage with full HL7 schema  
-✅ Sample file processing system  
-✅ Data unescaping and normalization  
-✅ Search and browse functionality  
-
-## 🔌 API Endpoints
-
-### Upload & Processing
-- `POST /api/v1/upload/hl7` - Upload HL7 file
-- `POST /api/v1/upload/hl7/text` - Upload HL7 as text
-- `GET /api/v1/upload/status/{id}` - Check processing status
-
-### Format Retrieval  
-- `GET /api/v1/formats/{id}` - Get all available formats
-- `GET /api/v1/formats/{id}/xml` - Get XML format
-- `GET /api/v1/formats/{id}/json` - Get JSON format
-- `GET /api/v1/formats/{id}/pdf` - Get PDF format
-
-### Browse & Search
-- `GET /api/v1/browse/messages` - Browse processed messages
-- `GET /api/v1/browse/stats` - Processing statistics
-- `GET /api/v1/browse/search` - Search messages
-
-### Sample Files
-- `GET /api/v1/samples` - List sample files
-- `POST /api/v1/samples/process` - Process specific sample
-- `POST /api/v1/samples/process-all` - Process all samples
-
-## 🎯 User Flow
-
-1. **Upload** → HL7 file uploaded via web interface or API
-2. **Validation** → System validates HL7 v2 format
-3. **Storage** → Raw message stored in PostgreSQL
-4. **AI Processing** → Mastra agents convert to XML, JSON, PDF
-5. **Access** → Users browse and download converted formats
-
-## 🐳 Docker Commands
+### Option 2: Full System (Docker)
 
 ```bash
 # Start core services
@@ -137,71 +97,119 @@ hl7-parse/
 # Start with monitoring
 ./start.sh --monitoring
 
-# Start everything  
+# Start everything
 ./start.sh --all
-
-# View logs
-docker-compose logs -f backend
-
-# Stop services
-docker-compose down
-
-# Rebuild
-docker-compose up --build -d
 ```
-
-## 🛠️ Management
-
-### Database Access
-```bash
-# Connect to PostgreSQL
-docker-compose exec postgres psql -U hl7user -d hl7_liteboard
-
-# Run migrations
-docker-compose exec backend alembic upgrade head
-```
-
-### Service Health
-```bash
-# Check all services
-docker-compose ps
-
-# Individual health checks
-curl http://localhost:8000/health      # Backend
-curl http://localhost:3001/health      # Mock Mastra
-```
-
-## 🔒 Security
-
-- Input validation and sanitization
-- SQL injection prevention  
-- File size limits and type validation
-- Proper error handling without information leakage
-- Environment variable configuration
-
-## 📈 Production Considerations
-
-- Replace mock Mastra service with real AI agents
-- Implement authentication/authorization
-- Add rate limiting and request throttling
-- Set up SSL/TLS certificates
-- Configure monitoring and alerting
-- Implement backup strategies
-
-## 🤝 Contributing
-
-1. The system is modular and extensible
-2. Add new HL7 message types in `app/models/`
-3. Extend API endpoints in `app/routers/`
-4. Add business logic in `app/services/`
-5. Database changes via Alembic migrations
-
-## 📚 Documentation
-
-- **API Docs**: Available at `/docs` when running
-- **Database Schema**: See `app/database/models.py`
-- **Sample Data**: Realistic HL7 examples in `sample_files/`
 
 ---
 
-**Built for healthcare professionals to easily work with HL7 data without technical complexity.** 🏥✨
+## 🧪 Testing
+
+### Automated Testing
+
+```bash
+# Frontend unit tests
+npm test
+
+# API endpoint tests
+./fastapi-backend/test-endpoints.sh
+```
+
+### Manual Tests
+
+```bash
+# Process all sample files
+curl -X POST http://localhost:8000/api/v1/samples/process-all
+```
+
+---
+
+## 📊 Access Points
+
+* **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Backend Health**: [http://localhost:8000/health](http://localhost:8000/health)
+* **Database Admin**: [http://localhost:8080](http://localhost:8080) ([admin@hl7liteboard.com](mailto:admin@hl7liteboard.com) / admin123)
+* **Mock Mastra**: [http://localhost:3001/health](http://localhost:3001/health)
+
+---
+
+## 🎯 Use Cases
+
+* **Emergency Department**: Quick patient intake and updates
+* **Laboratory Results**: Clean presentation of ORU messages
+* **Patient Transfers**: Streamlined ADT message management
+* **Discharge Planning**: Efficient preparation of discharge summaries
+
+---
+
+## 🔧 Development
+
+### Project Structure
+
+```
+hl7-parse/
+├── fastapi-backend/         # FastAPI application
+│   ├── app/                # Application code
+│   ├── sample_files/       # 4 realistic HL7 samples
+│   ├── mock-mastra/        # Mock AI service
+│   └── Dockerfile
+├── docker-compose.yml
+└── start.sh
+```
+
+### Sample HL7 Files
+
+* **adt_admission.hl7** – Patient admission with allergies
+* **oru_lab_results.hl7** – Laboratory results (CBC, metabolic panel)
+* **orm_medication_order.hl7** – Medication orders
+* **adt_discharge.hl7** – Patient discharge with procedures
+
+### Features Implemented
+
+✅ HL7 v2 parsing and validation
+✅ Multi-format conversion (XML, JSON, PDF)
+✅ Dashboard for real-time edits
+✅ REST API with OpenAPI docs
+✅ Database storage with full schema
+✅ Metrics and monitoring support
+
+---
+
+## 🔒 Security
+
+* Input validation & sanitization
+* SQL injection prevention
+* File size/type validation
+* Error handling without leaks
+* Env-based configuration
+
+---
+
+## 📈 Production Considerations
+
+* Replace mock AI with real agents
+* Add authentication/authorization
+* Enable rate limiting & throttling
+* Set up SSL/TLS
+* Implement backups & monitoring
+
+---
+
+## 🤝 Contributing
+
+* Extend HL7 models in `app/models/`
+* Add API endpoints in `app/routers/`
+* Add logic in `app/services/`
+* Schema updates via Alembic migrations
+
+---
+
+## 📄 License
+
+MIT License – free to use and improve for better healthcare workflows.
+
+---
+
+**Built for Better Healthcare Interoperability** 🏥✨
+HL7 LiteBoard bridges the technical gap between healthcare systems and the clinicians who use them.
+
