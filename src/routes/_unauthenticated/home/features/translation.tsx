@@ -1,11 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
+import Translate from '@/features/home/translation'
 
-export const Route = createFileRoute(
-  '/_unauthenticated/home/features/translation',
-)({
-  component: RouteComponent,
+export const Route = createFileRoute('/_unauthenticated/home/features/translation')({
+  component: Translate,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_unauthenticated/home/features/translation"!</div>
-}
