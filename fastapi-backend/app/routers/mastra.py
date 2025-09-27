@@ -10,8 +10,15 @@ import logging
 from app.services.mastra_service import MastraService, MockMastraService
 from app.utils.file_handler import file_handler
 from app.models.hl7_models import ConversionRequest, ConversionResponse
+from pydantic import BaseModel
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
+
+class MedicalDocumentRequest(BaseModel):
+    hl7_content: str
+    generatePdf: Optional[bool] = False
+    format: Optional[str] = "both"
 
 router = APIRouter(prefix="/mastra", tags=["Mastra AI Conversion"])
 
@@ -232,6 +239,46 @@ async def convert_uploaded_file_to_both_formats(file: UploadFile = File(...)):
     except Exception as e:
         logger.error(f"Error converting uploaded file to both formats: {e}")
         raise HTTPException(status_code=500, detail=f"File conversion failed: {str(e)}")
+
+@router.post("/convert/plain-english")
+async def convert_hl7_to_plain_english(request: ConversionRequest):
+    """
+    Convert HL7 message to plain English medical report
+    """
+    try:
+        result = await mastra_service.convert_hl7_to_plain_english(request.hl7_content)
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Error converting HL7 to plain English: {e}")
+        raise HTTPException(status_code=500, detail=f"Plain English conversion failed: {str(e)}")
+
+@router.post("/convert/latex")
+async def convert_hl7_to_latex(request: ConversionRequest):
+    """
+    Convert HL7 message to LaTeX document
+    """
+    try:
+        result = await mastra_service.convert_hl7_to_latex(request.hl7_content)
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Error converting HL7 to LaTeX: {e}")
+        raise HTTPException(status_code=500, detail=f"LaTeX conversion failed: {str(e)}")
+
+@router.post("/convert/medical-document")
+async def convert_hl7_to_medical_document(request: MedicalDocumentRequest):
+    """
+    Convert HL7 message to complete medical document with optional PDF generation
+    """
+    try:
+        result = await mastra_service.convert_hl7_to_medical_document(
+            request.hl7_content,
+            request.generatePdf,
+            request.format
+        )
+        return JSONResponse(content=result)
+    except Exception as e:
+        logger.error(f"Error converting HL7 to medical document: {e}")
+        raise HTTPException(status_code=500, detail=f"Medical document generation failed: {str(e)}")
 
 @router.get("/agent/status/{agent_name}")
 async def get_agent_status(agent_name: str):

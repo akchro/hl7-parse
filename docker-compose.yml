@@ -20,12 +20,16 @@ services:
   mastra-service:
     build:
       context: ./mastra-service
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.light
     container_name: hl7-mastra
     environment:
       GOOGLE_GENERATIVE_AI_API_KEY: AIzaSyAOmh0Jegw90UjzF-nDy4c3PAIFMVE5Z6Q
       PORT: 3001
       NODE_ENV: production
+      PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
+      PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
+    volumes:
+      - ./mastra-service/output:/app/output
     ports:
       - "3001:3001"
     healthcheck:

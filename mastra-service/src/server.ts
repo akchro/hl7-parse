@@ -2,6 +2,14 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { HL7MedicalDocumentAgent } from './hl7-medical-agent-html.js';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Load environment variables
 dotenv.config();
@@ -244,11 +252,149 @@ Return only valid XML without any markdown formatting or additional text.
   }
 });
 
+// Initialize Medical Document Agent
+const medicalAgent = new HL7MedicalDocumentAgent(process.env.GOOGLE_GENERATIVE_AI_API_KEY!);
+
+// Create output directory for PDFs if it doesn't exist
+const outputDir = path.join(__dirname, '..', 'output');
+if (!fs.existsSync(outputDir)) {
+  fs.mkdirSync(outputDir, { recursive: true });
+}
+
+// HL7 to Plain English endpoint
+app.post('/convert-hl7/plain-english', async (req, res) => {
+  try {
+    const { hl7Content } = req.body;
+
+    if (!hl7Content) {
+      return res.status(400).json({
+        error: 'hl7Content is required in request body',
+      });
+    }
+
+    console.log('Processing HL7 to Plain English conversion...');
+    const plainEnglish = await medicalAgent.convertToPlainEnglish(hl7Content);
+
+    res.json({
+      success: true,
+      data: {
+        plainEnglish,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error processing HL7 to Plain English:', error);
+    res.status(500).json({
+      error: 'Internal server error during Plain English conversion',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// HL7 to LaTeX endpoint
+app.post('/convert-hl7/latex', async (req, res) => {
+  try {
+    const { hl7Content } = req.body;
+
+    if (!hl7Content) {
+      return res.status(400).json({
+        error: 'hl7Content is required in request body',
+      });
+    }
+
+    console.log('Processing HL7 to LaTeX conversion...');
+    const plainEnglish = await medicalAgent.convertToPlainEnglish(hl7Content);
+    const latexContent = await medicalAgent.convertToLatex(plainEnglish, hl7Content);
+
+    res.json({
+      success: true,
+      data: {
+        plainEnglish,
+        latex: latexContent,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error processing HL7 to LaTeX:', error);
+    res.status(500).json({
+      error: 'Internal server error during LaTeX conversion',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// HL7 to Medical Document (PDF) endpoint
+app.post('/convert-hl7/medical-document', async (req, res) => {
+  try {
+    const { hl7Content, generatePdf = false, format = 'both' } = req.body;
+
+    if (!hl7Content) {
+      return res.status(400).json({
+        error: 'hl7Content is required in request body',
+      });
+    }
+
+    console.log('Processing HL7 to Medical Document...');
+    
+    // Generate unique filename for PDF if requested
+    const timestamp = Date.now();
+    const pdfFilename = generatePdf ? `medical-doc-${timestamp}.pdf` : undefined;
+    const pdfPath = pdfFilename ? path.join(outputDir, pdfFilename) : undefined;
+
+    const result = await medicalAgent.processHL7ToMedicalDocument(
+      hl7Content,
+      pdfPath,
+      format
+    );
+
+    // If PDF was generated, send it as base64
+    let pdfBase64: string | undefined;
+    if (result.pdfBuffer) {
+      pdfBase64 = result.pdfBuffer.toString('base64');
+    }
+
+    res.json({
+      success: true,
+      data: {
+        plainEnglish: result.plainEnglish,
+        html: result.html,
+        latex: result.latex,
+        pdfBase64,
+        pdfFilename,
+        timestamp: new Date().toISOString()
+      }
+    });
+  } catch (error) {
+    console.error('Error processing HL7 to Medical Document:', error);
+    res.status(500).json({
+      error: 'Internal server error during Medical Document generation',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Endpoint to download generated PDF files
+app.get('/download/pdf/:filename', (req, res) => {
+  const { filename } = req.params;
+  const filePath = path.join(outputDir, filename);
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({
+      error: 'File not found'
+    });
+  }
+
+  res.download(filePath, filename);
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Mastra HL7 Service running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(`HL7 Conversion: http://localhost:${PORT}/convert-hl7`);
+  console.log(`HL7 to Plain English: http://localhost:${PORT}/convert-hl7/plain-english`);
+  console.log(`HL7 to LaTeX: http://localhost:${PORT}/convert-hl7/latex`);
+  console.log(`HL7 to Medical Document: http://localhost:${PORT}/convert-hl7/medical-document`);
 });
 
 export default app;

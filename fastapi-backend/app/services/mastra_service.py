@@ -75,6 +75,72 @@ class MastraService:
             logger.error(f"Error calling Mastra conversion: {e}")
             raise
     
+    async def convert_hl7_to_plain_english(self, hl7_content: str) -> Dict[str, Any]:
+        """
+        Convert HL7 message to plain English medical report
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7/plain-english",
+                    json={"hl7Content": hl7_content}
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra plain English conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra plain English conversion: {e}")
+            raise
+    
+    async def convert_hl7_to_latex(self, hl7_content: str) -> Dict[str, Any]:
+        """
+        Convert HL7 message to LaTeX document
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7/latex",
+                    json={"hl7Content": hl7_content}
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra LaTeX conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra LaTeX conversion: {e}")
+            raise
+    
+    async def convert_hl7_to_medical_document(
+        self, 
+        hl7_content: str, 
+        generate_pdf: bool = False,
+        format: str = "both"
+    ) -> Dict[str, Any]:
+        """
+        Convert HL7 message to complete medical document with optional PDF
+        """
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(
+                    f"{self.mastra_endpoint}/convert-hl7/medical-document",
+                    json={
+                        "hl7Content": hl7_content,
+                        "generatePdf": generate_pdf,
+                        "format": format
+                    }
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra medical document conversion: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra medical document conversion: {e}")
+            raise
+    
     async def process_hl7_message(self, hl7_content: str) -> Dict[str, Any]:
         """
         Process HL7 message using Mastra agents - legacy method for compatibility
@@ -313,6 +379,120 @@ startxref
 275
 %%EOF"""
         return pdf_content.encode('utf-8')
+    
+    async def convert_hl7_to_plain_english(self, hl7_content: str) -> Dict[str, Any]:
+        """Mock plain English conversion"""
+        await asyncio.sleep(1)
+        return {
+            "success": True,
+            "data": {
+                "plainEnglish": self._generate_mock_plain_english(hl7_content),
+                "timestamp": "2024-12-01T12:00:00Z"
+            }
+        }
+    
+    async def convert_hl7_to_latex(self, hl7_content: str) -> Dict[str, Any]:
+        """Mock LaTeX conversion"""
+        await asyncio.sleep(1)
+        return {
+            "success": True,
+            "data": {
+                "plainEnglish": self._generate_mock_plain_english(hl7_content),
+                "latex": self._generate_mock_latex(),
+                "timestamp": "2024-12-01T12:00:00Z"
+            }
+        }
+    
+    async def convert_hl7_to_medical_document(
+        self, 
+        hl7_content: str, 
+        generate_pdf: bool = False,
+        format: str = "both"
+    ) -> Dict[str, Any]:
+        """Mock medical document conversion"""
+        await asyncio.sleep(2)
+        result = {
+            "success": True,
+            "data": {
+                "plainEnglish": self._generate_mock_plain_english(hl7_content),
+                "timestamp": "2024-12-01T12:00:00Z"
+            }
+        }
+        
+        if format in ["html", "both"]:
+            result["data"]["html"] = self._generate_mock_html()
+        
+        if format in ["latex", "both"]:
+            result["data"]["latex"] = self._generate_mock_latex()
+        
+        if generate_pdf:
+            result["data"]["pdfBase64"] = "bW9jayBwZGYgY29udGVudA=="
+            result["data"]["pdfFilename"] = "medical-doc-mock.pdf"
+        
+        return result
+    
+    def _generate_mock_plain_english(self, hl7_content: str) -> str:
+        """Generate mock plain English output"""
+        return """MEDICAL REPORT
+
+Patient Information:
+- Name: John Doe
+- ID: 123456789
+- Date of Birth: March 15, 1985
+- Gender: Male
+
+Visit Information:
+- Visit Number: V20241201001
+- Admission Date: December 1, 2024 at 12:00 PM
+- Location: Intensive Care Unit, Room 101
+- Attending Physician: Dr. Jane Smith
+
+Clinical Notes:
+The patient was admitted to the ICU for observation following a surgical procedure.
+
+Allergies:
+- Penicillin (Severe - Risk of anaphylaxis)
+
+Current Medications:
+- None listed
+
+Lab Results:
+- No recent lab results available
+
+This is a mock medical report generated for demonstration purposes."""
+    
+    def _generate_mock_html(self) -> str:
+        """Generate mock HTML output"""
+        return """<!DOCTYPE html>
+<html>
+<head>
+    <title>Medical Report</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        h1 { color: #333; }
+        .section { margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>Medical Report</h1>
+    <div class="section">
+        <h2>Patient Information</h2>
+        <p>Name: John Doe</p>
+        <p>ID: 123456789</p>
+    </div>
+</body>
+</html>"""
+    
+    def _generate_mock_latex(self) -> str:
+        """Generate mock LaTeX output"""
+        return r"""\documentclass{article}
+\begin{document}
+\title{Medical Report}
+\maketitle
+\section{Patient Information}
+Name: John Doe\\
+ID: 123456789\\
+\end{document}"""
     
     async def health_check(self) -> bool:
         """Mock health check always returns True"""

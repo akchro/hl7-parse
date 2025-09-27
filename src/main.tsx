@@ -6,8 +6,10 @@ function SimpleHL7Converter() {
   const [hl7Input, setHl7Input] = useState('')
   const [jsonOutput, setJsonOutput] = useState('')
   const [xmlOutput, setXmlOutput] = useState('')
+  const [pdfBase64, setPdfBase64] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
@@ -92,6 +94,94 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
     }
   }
 
+  const handleGeneratePdf = async () => {
+    if (!hl7Input.trim()) {
+      setError('Please enter HL7 text before generating PDF.')
+      return
+    }
+
+    setIsGeneratingPdf(true)
+    setError(null)
+    setPdfBase64('')
+
+    try {
+      const response = await fetch('/api/v1/mastra/convert/medical-document', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hl7_content: hl7Input,
+          generatePdf: true,
+          format: 'both'
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${data.detail || 'Unknown error'}`)
+      }
+
+      if (data.success && data.data.pdfBase64) {
+        setPdfBase64(data.data.pdfBase64)
+        setSuccess(true)
+      } else {
+        throw new Error(data.message || 'PDF generation failed')
+      }
+
+    } catch (err) {
+      console.error('PDF generation error:', err)
+      setError(`PDF generation failed: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setIsGeneratingPdf(false)
+    }
+  }
+
+  const viewPdf = () => {
+    if (pdfBase64) {
+      try {
+        const byteCharacters = atob(pdfBase64)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        const blob = new Blob([byteArray], { type: 'application/pdf' })
+        const url = URL.createObjectURL(blob)
+        
+        const newWindow = window.open(url, '_blank')
+        if (newWindow) {
+          setTimeout(() => URL.revokeObjectURL(url), 1000)
+        } else {
+          setError('Please allow popups to view the PDF')
+          URL.revokeObjectURL(url)
+        }
+      } catch (error) {
+        console.error('Error opening PDF:', error)
+        setError('Failed to open PDF')
+      }
+    }
+  }
+
+  const downloadPdf = () => {
+    if (pdfBase64) {
+      const byteCharacters = atob(pdfBase64)
+      const byteNumbers = new Array(byteCharacters.length)
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i)
+      }
+      const byteArray = new Uint8Array(byteNumbers)
+      const blob = new Blob([byteArray], { type: 'application/pdf' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = 'medical-document.pdf'
+      link.click()
+      URL.revokeObjectURL(url)
+    }
+  }
+
   const handleSaveToDatabase = async () => {
     if (!hl7Input.trim() || (!jsonOutput || jsonOutput.startsWith('Error')) && (!xmlOutput || xmlOutput.startsWith('Error'))) {
       setError('Please convert the HL7 message successfully before saving.')
@@ -122,6 +212,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
           hl7_content: hl7Input,
           json_content: parsedJson,
           xml_content: xmlOutput && !xmlOutput.startsWith('Error') ? xmlOutput : null,
+          pdf_base64: pdfBase64 || null,
           title: `HL7 Conversion - ${new Date().toLocaleString()}`,
           description: 'Converted using Gemini AI'
         })
@@ -189,6 +280,16 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                 className="px-4 py-2 border border-border rounded-md text-foreground hover:bg-accent transition-colors"
               >
                 Load Sample
+              </button>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleGeneratePdf}
+                disabled={isGeneratingPdf || !hl7Input.trim()}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-green-700 transition-colors"
+              >
+                {isGeneratingPdf ? 'Generating PDF...' : 'Generate Medical PDF'}
               </button>
             </div>
 
@@ -260,6 +361,29 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
           </div>
         </div>
         
+        {/* PDF Actions */}
+        {pdfBase64 && (
+          <div className="mt-6 text-center">
+            <div className="p-4 bg-green-50 border border-green-200 rounded-md mb-4">
+              <p className="text-green-800 font-medium mb-3">✅ Medical PDF Generated Successfully!</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={viewPdf}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  👁️ View PDF
+                </button>
+                <button
+                  onClick={downloadPdf}
+                  className="bg-gray-600 text-white px-6 py-3 rounded-md font-semibold hover:bg-gray-700 transition-colors flex items-center gap-2"
+                >
+                  📥 Download PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Save to Database Button */}
         {jsonOutput && xmlOutput && (
           <div className="mt-6 text-center">
