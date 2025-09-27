@@ -1,132 +1,103 @@
-# The Campus Chronicle - Student News Platform
+# HL7 LiteBoard
 
-![Campus Chronicle Logo](public/logo.png) <!-- Add your newspaper logo path -->
+A lightweight, clinician-friendly solution that ingests HL7 data streams and presents them in a digestible, editable, and exportable format. Built for healthcare professionals to bridge the gap between complex HL7 standards and daily clinical workflows.
 
-A digital-first student news platform built by students, for students. Featuring award-winning journalism, multimedia storytelling, and real-time campus coverage.
+## 🚀 Overview
 
-## Technologies Used
+HL7 LiteBoard translates complex HL7 v2 messages into a clean, interactive dashboard, allowing healthcare professionals to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML). This tool reduces intake and discharge times while lowering integration costs for healthcare systems.
 
-- ⚡ **Vite** - Next-gen frontend tooling  
-- 🎨 **ShadCN/ui** - Beautifully designed components  
-- ✨ **Framer Motion** - Smooth reading experience animations  
-- 📱 **React** - Modern frontend framework  
-- 🚀 **TypeScript** - Type-safe JavaScript  
-- 🛠️ **TanStack Router** - Client-side routing  
+## 🏥 Problem Statement
 
-## Getting Started
+- **Complexity of HL7**: HL7 v2 is the backbone of healthcare interoperability, but its structure is highly technical and difficult for non-technical users to interpret
+- **Cost of Integration**: Hospitals spend significant resources on interface engines and consultants to manage HL7 data
+- **Workflow Inefficiencies**: Patient intake and discharge involve multiple handoffs, resulting in delays, redundant data entry, and errors
+- **Accessibility Gap**: Non-technical healthcare staff cannot easily read, update, or act on HL7 data without IT involvement
 
-### Prerequisites
+## 💡 Solution
 
-- Node.js v18+ (recommended v20)  
-- npm v9+ or pnpm v8+  
-- Git  
+HL7 LiteBoard provides a simplified interface that:
 
-### Installation
+- **Ingests** HL7 v2 messages (e.g., ADT for admissions, ORU for labs)
+- **Transforms** and displays patient information in an intuitive dashboard
+- **Enables** real-time edits to key fields (allergies, medications, discharge notes)
+- **Generates** updated HL7/FHIR messages to maintain interoperability
+- **Provides** one-click export in PDF, JSON, or XML formats for easy sharing and record-keeping
 
-1. **Clone the repository**  
-   ```bash
-   git clone https://github.com/campus-chronicle/web-app.git
-   cd web-app
-   ```
+This system acts as a translation and interaction layer between hospital systems and healthcare professionals, improving usability without requiring deep technical expertise.
 
-2. **Install dependencies**  
-   ```bash
-   npm install
-   ```
-   or  
-   ```bash
-   pnpm install
-   ```
-
-3. **Configure environment**  
-   ```bash
-   cp .env.example .env
-   ```
-   Edit the `.env` file with your CMS and API keys.
-
-### Running the Development Server
+## 🛠️ Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/hl7-liteboard.git
+cd hl7-liteboard
+
+# Install dependencies
+npm install
+```
+
+## 🚀 Quick Start
+
+```bash
+# Start the development server
 npm run dev
 ```
-or  
-```bash
-pnpm dev
-```
 
-The application will be available at:  
-[http://localhost:5173](http://localhost:5173)
+The application will be available at `http://localhost:5173` (or the port specified in your configuration).
 
-## Project Structure
+## 📋 Features
 
-```
-campus-chronicle/
-├── public/            # Static assets
-├── src/
-│   ├── components/    # Reusable UI components
-│   ├── lib/           # Utilities and helpers
-│   ├── sections/      # News sections (news, sports, etc.)
-│   ├── styles/        # Global styles
-│   ├── cms/           # Content management integration
-│   └── assets/        # Images, icons, etc.
-├── .env.example       # Environment variables template
-├── vite.config.ts     # Vite configuration
-└── tsconfig.json      # TypeScript configuration
-```
+### Core Functionality
+- **HL7 Message Ingestion**: Supports ADT, ORU, and other HL7 v2 message types
+- **Interactive Dashboard**: Clean, clinician-friendly interface for patient data
+- **Real-time Editing**: Modify allergies, medications, and discharge notes directly
+- **Multi-format Export**: Generate PDF, JSON, and XML reports with one click
+- **FHIR Compatibility**: Maintains interoperability with modern healthcare standards
 
-## Key Features
+### Workflow Benefits
+- Reduces patient intake and discharge processing time
+- Eliminates redundant data entry
+- Minimizes errors through intuitive interfaces
+- Lowers dependency on IT staff for HL7 data management
 
-- **Editorial Workflow System**  
-  Custom CMS for student journalists to submit and edit stories  
-- **Multimedia Integration**  
-  Supports embedded videos, photo galleries, and interactive content  
-- **Real-time Updates**  
-  Push notifications for breaking campus news  
-- **Accessible Reading**  
-  Optimized for all devices with dark/light mode  
+## 🏗️ Architecture
 
-## Available Scripts
+HL7 LiteBoard acts as a middleware solution that:
+1. **Receives** HL7 v2 messages from hospital systems
+2. **Parses** and transforms data into structured JSON
+3. **Presents** information through an intuitive web interface
+4. **Captures** clinician updates and modifications
+5. **Generates** updated HL7/FHIR messages for system integration
 
-- `dev` - Start development server  
-- `build` - Create production build  
-- `preview` - Preview production build locally  
-- `lint` - Run ESLint  
-- `type-check` - Verify TypeScript types  
+## 🎯 Use Cases
 
-## Deployment
+- **Emergency Department**: Quick patient intake and status updates
+- **Laboratory Results**: Clean presentation of ORU messages for clinicians
+- **Patient Transfers**: Streamlined ADT message management during care transitions
+- **Discharge Planning**: Efficient preparation and export of discharge summaries
 
-For production deployment:
+## 🔧 Development
 
 ```bash
+# Build for production
 npm run build
+
+# Run tests
+npm test
+
+# Run code
+npm run lint
 ```
 
-The build artifacts will be in the `dist/` directory. Deploy to:
+## 🤝 Contributing
 
-- Student organization web hosting  
-- University servers  
-- Vercel/Netlify for student access  
+This project was developed as a hackathon solution to address real healthcare interoperability challenges. We welcome contributions from developers and healthcare professionals alike!
 
-## Content Management
+## 📄 License
 
-Integrates with:
-
-- **Sanity.io** for article management  
-- **Cloudinary** for media assets  
-- **Google Docs** for collaborative editing  
-
-## Contributing
-
-We welcome student contributors!  
-1. Attend our onboarding workshop  
-2. Claim an issue from our board  
-3. Submit PRs for review by editorial staff  
-
-## License
-
-[MIT](LICENSE) © 2024 The Campus Chronicle  
+MIT License - feel free to use this project to improve healthcare workflows in your organization.
 
 ---
 
-**Student Press Freedom**  
-This project adheres to the Society of Professional Journalists' Code of Ethics
+**Built for Better Healthcare Interoperability**  
+HL7 LiteBoard bridges the technical gap between healthcare systems and the clinicians who use them.
