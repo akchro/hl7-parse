@@ -39,12 +39,9 @@ const PDF_API_ENDPOINTS = {
   preview: '/api/preview-pdf', // POST endpoint for PDF preview
 }
 
-interface PDFGeneratorProps {
-  hl7Content: string
-  messageType: string
-  jsonData?: any
-  xmlData?: string
-  onBack?: () => void
+interface PDFGeneratorPageProps {
+  hl7Content?: string
+  messageType?: string
 }
 
 interface PDFSection {
@@ -221,14 +218,29 @@ const formatHL7Date = (dateStr: string): string => {
   return dateStr;
 };
 
-export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlData, onBack }: PDFGeneratorProps) {
+// Default HL7 content for demonstration
+const defaultHL7Content = `MSH|^~\\&|HIS|HOSPITAL|LAB|HOSPITAL|20230101120000||ADT^A01|MSG00001|P|2.5|
+PID|1|123456789|123456789^^^HOSPITAL^MR||DOE^JOHN^A^^MR||19800101|M|||123 MAIN ST^^ANYTOWN^ST^12345^USA||(555)555-1234|||S|||123456789|
+PV1|1|I|ICU^201^1^HOSPITAL^01||||123456^DOCTOR^ALAN^A^^DR^^^HOSPITAL|||||||||123456^DOCTOR^ALAN^A^^DR^^^HOSPITAL|
+OBR|1|123456789|LAB12345^LAB|CBC^COMPLETE BLOOD COUNT|||20230101120000||||||||123456^DOCTOR^ALAN^A^^DR^^^HOSPITAL|||||||||||F|
+OBX|1|NM|WBC^WHITE BLOOD CELLS||7.5|10^3/uL|4.0-11.0|N|||F|
+OBX|2|NM|RBC^RED BLOOD CELLS||4.5|10^6/uL|4.5-6.0|N|||F|`
+
+const defaultMessageType = "ADT^A01"
+
+export default function PDFGeneratorPage({ 
+  hl7Content = defaultHL7Content, 
+  messageType = defaultMessageType 
+}: PDFGeneratorPageProps) {
   const [isGenerating, setIsGenerating] = useState(false)
   const [pdfUrl, setPdfUrl] = useState<string>("")
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [error, setError] = useState("")
   const [activeTab, setActiveTab] = useState("preview")
+  const [customHL7Content, setCustomHL7Content] = useState(hl7Content)
+  const [customMessageType, setCustomMessageType] = useState(messageType)
 
-  const pdfData = parseHL7ForPDF(hl7Content, messageType)
+  const pdfData = parseHL7ForPDF(customHL7Content, customMessageType)
 
   const handleGeneratePDF = async () => {
     setIsGenerating(true)
@@ -271,7 +283,19 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
   }
 
   const handleCopyHL7 = () => {
-    navigator.clipboard.writeText(hl7Content)
+    navigator.clipboard.writeText(customHL7Content)
+  }
+
+  const handleHL7ContentChange = (content: string) => {
+    setCustomHL7Content(content)
+    // Try to extract message type from MSH segment
+    const mshSegment = content.split('\n').find(line => line.startsWith('MSH'))
+    if (mshSegment) {
+      const fields = mshSegment.split('|')
+      if (fields[8]) {
+        setCustomMessageType(fields[8])
+      }
+    }
   }
 
   const getMessageTypeDisplay = () => {
@@ -282,7 +306,7 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
       'ORU^R01': 'ORU-R01 - Observation Result',
       'ORM^O01': 'ORM-O01 - Order Message',
     }
-    return typeMap[messageType] || messageType
+    return typeMap[customMessageType] || customMessageType
   }
 
   return (
@@ -296,10 +320,6 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <Button variant="outline" onClick={onBack} className="gap-2 mb-4">
-              <ArrowLeft className="h-4 w-4" />
-              Back to Converter
-            </Button>
             <h1 className="text-3xl font-bold">HL7 to PDF Generator</h1>
             <p className="text-muted-foreground">Create readable PDF documents from HL7 messages</p>
           </div>
@@ -314,6 +334,59 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
             </Button>
           </div>
         </div>
+
+        {/* HL7 Input Section */}
+        <Card>
+          <CardHeader>
+            <CardTitle>HL7 Message Input</CardTitle>
+            <CardDescription>
+              Paste your HL7 message below or use the default example
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="messageType">Message Type</Label>
+                  <Textarea
+                    id="messageType"
+                    value={customMessageType}
+                    onChange={(e) => setCustomMessageType(e.target.value)}
+                    className="font-mono text-sm h-10"
+                    placeholder="e.g., ADT^A01"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="messageTypeDisplay">Message Type Display</Label>
+                  <div className="flex items-center h-10 px-3 border rounded-md bg-muted/50">
+                    <span className="text-sm">{getMessageTypeDisplay()}</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="hl7Content">HL7 Message Content</Label>
+                <Textarea
+                  id="hl7Content"
+                  value={customHL7Content}
+                  onChange={(e) => handleHL7ContentChange(e.target.value)}
+                  rows={8}
+                  className="font-mono text-sm"
+                  placeholder="Paste your HL7 message here..."
+                />
+              </div>
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={handleCopyHL7} className="gap-2">
+                  <Copy className="h-4 w-4" />
+                  Copy HL7
+                </Button>
+                <Button onClick={handlePreviewPDF} className="gap-2">
+                  <Eye className="h-4 w-4" />
+                  Generate Preview
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Patient Summary */}
@@ -380,7 +453,7 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
           <div className="lg:col-span-2 space-y-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="preview" onClick={handlePreviewPDF}>
+                <TabsTrigger value="preview">
                   <Eye className="h-4 w-4 mr-2" />
                   PDF Preview
                 </TabsTrigger>
@@ -466,12 +539,12 @@ export default function PDFGenerator({ hl7Content, messageType, jsonData, xmlDat
                       </Button>
                     </CardTitle>
                     <CardDescription>
-                      Original HL7 message content
+                      Current HL7 message content
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <Textarea 
-                      value={hl7Content}
+                      value={customHL7Content}
                       readOnly
                       rows={12}
                       className="font-mono text-sm"
