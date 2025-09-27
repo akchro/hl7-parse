@@ -21,22 +21,26 @@ export function Navbar() {
     {
       title: "HL7 Translation",
       icon: <Zap className="w-5 h-5" />,
-      description: "Convert complex HL7 messages into readable formats"
+      description: "Convert complex HL7 messages into readable formats",
+      route: "/home/features/translation"
     },
     {
       title: "Real-time Editing",
       icon: <FileText className="w-5 h-5" />,
-      description: "Update patient records directly in the interface"
+      description: "Update patient records directly in the interface",
+      route: "/home/features/edit"
     },
     {
       title: "Secure Export",
       icon: <Shield className="w-5 h-5" />,
-      description: "Generate PDF, JSON, XML with one click"
+      description: "Generate PDF, JSON, XML with one click",
+      route: "/home/features/export"
     },
     {
       title: "Workflow Optimization",
       icon: <Heart className="w-5 h-5" />,
-      description: "Reduce intake and discharge times significantly"
+      description: "Reduce intake and discharge times significantly",
+      route: "/home/features/workflow"
     }
   ]
 
@@ -72,19 +76,21 @@ export function Navbar() {
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-80 p-3 grid grid-cols-1 gap-2">
               {featuresItems.map((item) => (
-                <DropdownMenuItem key={item.title} className="flex items-start gap-3 p-3 rounded-lg">
-                  <div className="text-blue-600 mt-0.5">{item.icon}</div>
-                  <div>
-                    <p className="font-medium text-sm">{item.title}</p>
-                    <p className="text-xs text-foreground/70">{item.description}</p>
-                  </div>
+                <DropdownMenuItem key={item.title} asChild>
+                  <Link to={item.route} className="flex items-start gap-3 p-3 rounded-lg w-full">
+                    <div className="text-blue-600 mt-0.5">{item.icon}</div>
+                    <div>
+                      <p className="font-medium text-sm">{item.title}</p>
+                      <p className="text-xs text-foreground/70">{item.description}</p>
+                    </div>
+                  </Link>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
 
           <Link 
-            to="/problem" 
+            to="/home/problem" 
             className="text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium"
             activeProps={{ className: "font-medium" }}
           >
@@ -92,7 +98,7 @@ export function Navbar() {
           </Link>
 
           <Link 
-            to="/solution" 
+            to="/home/solution" 
             className="text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium"
             activeProps={{ className: "font-medium" }}
           >
@@ -100,7 +106,7 @@ export function Navbar() {
           </Link>
 
           <Link 
-            to="/demo" 
+            to="/home/demo" 
             className="text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium flex items-center gap-1"
             activeProps={{ className: "font-medium" }}
           >
@@ -156,19 +162,24 @@ export function Navbar() {
                 <p className="font-medium text-sm text-foreground/70 mb-2">Features</p>
                 <div className="space-y-3 ml-2">
                   {featuresItems.map((item) => (
-                    <div key={item.title} className="flex items-center gap-3 p-2 rounded-lg hover:bg-foreground/5">
+                    <Link
+                      key={item.title}
+                      to={item.route}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-foreground/5"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
                       <div className="text-blue-600">{item.icon}</div>
                       <div>
                         <p className="font-medium text-sm">{item.title}</p>
                         <p className="text-xs text-foreground/60">{item.description}</p>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </div>
 
               <Link
-                to="/problem"
+                to="/home/problem"
                 className="block py-3 text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium border-b border-foreground/5"
                 onClick={() => setMobileMenuOpen(false)}
                 activeProps={{ className: "font-medium" }}
@@ -177,7 +188,7 @@ export function Navbar() {
               </Link>
 
               <Link
-                to="/solution"
+                to="/home/solution"
                 className="block py-3 text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium border-b border-foreground/5"
                 onClick={() => setMobileMenuOpen(false)}
                 activeProps={{ className: "font-medium" }}
@@ -186,7 +197,7 @@ export function Navbar() {
               </Link>
 
               <Link
-                to="/demo"
+                to="/home/demo"
                 className="block py-3 text-foreground hover:text-foreground/80 transition-colors [&.active]:font-medium border-b border-foreground/5 flex items-center gap-2"
                 onClick={() => setMobileMenuOpen(false)}
                 activeProps={{ className: "font-medium" }}
