@@ -96,8 +96,6 @@ Return only the complete LaTeX document code, starting with \\documentclass and 
         
         resolve(pdfBuffer);
       });
-
-      input.pipe(fs.createWriteStream(outputPath));
     });
   }
 

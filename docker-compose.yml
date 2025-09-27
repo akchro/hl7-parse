@@ -10,7 +10,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
       - ./fastapi-backend/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
-      - "5432:5432"
+      - "5433:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 180s
@@ -20,12 +20,13 @@ services:
   mastra-service:
     build:
       context: ./mastra-service
-      dockerfile: Dockerfile.light
+      dockerfile: Dockerfile.mastra
     container_name: hl7-mastra
     environment:
       GOOGLE_GENERATIVE_AI_API_KEY: AIzaSyAOmh0Jegw90UjzF-nDy4c3PAIFMVE5Z6Q
       PORT: 3001
       NODE_ENV: production
+      MASTRA_LOG_LEVEL: info
       PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
       PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium"
     volumes:
