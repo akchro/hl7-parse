@@ -25,6 +25,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Navbar } from "@/components/home-bar"
+import { Footer } from "@/components/footer" // Import the Footer component
 
 const fadeIn = {
   hidden: { opacity: 0 },
@@ -374,6 +375,9 @@ export default function Home() {
           </div>
         </div>
       </motion.section>
+
+      {/* Footer Component */}
+      <Footer />
     </div>
   )
 }
