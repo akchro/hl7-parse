@@ -3,7 +3,6 @@
 import { motion } from "framer-motion"
 import {
   TrendingUp,
-  Users,
   Zap,
   ArrowRight,
   Play,

@@ -42,14 +42,14 @@ export const sidebarData: SidebarData = {
       title: 'HL7 Tools',
       items: [
         {
-          title: 'HL7 Converter',
-          url: '/hl7-converter',
-          icon: IconTransform,
-        },
-        {
           title: 'Dashboard',
           url: '/dash',
           icon: IconLayoutDashboard,
+        },
+        {
+          title: 'HL7 Converter',
+          url: '/hl7-converter',
+          icon: IconTransform,
         },
       ],
     },
@@ -57,12 +57,12 @@ export const sidebarData: SidebarData = {
       title: 'Core',
       items: [
         {
-          title: 'Resume Library',
+          title: 'Patients',
           url: '/dash/resumes',
           icon: IconChecklist,
         },
         {
-          title: 'Connections',
+          title: 'HL7 Messages',
           url: '/dash/connections',
           icon: IconUsers,
         },
