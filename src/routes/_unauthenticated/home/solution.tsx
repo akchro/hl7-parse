@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
+import Solution from '@/features/home/solution'
 
 export const Route = createFileRoute('/_unauthenticated/home/solution')({
-  component: RouteComponent,
+  component: Solution,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_unauthenticated/home/solution"!</div>
-}
