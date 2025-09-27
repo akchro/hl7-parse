@@ -4,7 +4,7 @@ SQLAlchemy database models for HL7 LiteBoard
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, DateTime, LargeBinary, Integer, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, LargeBinary, Integer, ForeignKey, Index, text
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -228,10 +228,14 @@ class AllergyData(Base):
 class SavedConversion(Base):
     """Table for storing user-saved conversion results"""
     __tablename__ = "saved_conversions"
+    __table_args__ = (
+        # Create a unique index on the hash of HL7 content to ensure uniqueness
+        Index('ix_saved_conversions_original_hl7_content_hash', text('MD5(original_hl7_content)'), unique=True),
+    )
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
-    # Original HL7 content
+    # Original HL7 content (unique)
     original_hl7_content = Column(Text, nullable=False)
     
     # Converted formats

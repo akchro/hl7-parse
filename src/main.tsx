@@ -7,8 +7,10 @@ function SimpleHL7Converter() {
   const [jsonOutput, setJsonOutput] = useState('')
   const [xmlOutput, setXmlOutput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const handleConvert = async () => {
     if (!hl7Input.trim()) {
@@ -90,6 +92,67 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
     }
   }
 
+  const handleSaveToDatabase = async () => {
+    if (!hl7Input.trim() || (!jsonOutput || jsonOutput.startsWith('Error')) && (!xmlOutput || xmlOutput.startsWith('Error'))) {
+      setError('Please convert the HL7 message successfully before saving.')
+      return
+    }
+
+    setIsSaving(true)
+    setError(null)
+    setSaveSuccess(false)
+
+    try {
+      // Parse the JSON output
+      let parsedJson = null
+      if (jsonOutput && !jsonOutput.startsWith('Error')) {
+        try {
+          parsedJson = JSON.parse(jsonOutput)
+        } catch (e) {
+          console.error('Failed to parse JSON for saving:', e)
+        }
+      }
+
+      const response = await fetch('/api/v1/conversions/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hl7_content: hl7Input,
+          json_content: parsedJson,
+          xml_content: xmlOutput && !xmlOutput.startsWith('Error') ? xmlOutput : null,
+          title: `HL7 Conversion - ${new Date().toLocaleString()}`,
+          description: 'Converted using Gemini AI'
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.status === 409) {
+        setError('This HL7 message has already been saved to the database.')
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${data.detail || 'Unknown error'}`)
+      }
+
+      if (data.success) {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      } else {
+        throw new Error(data.message || 'Save failed')
+      }
+
+    } catch (err) {
+      console.error('Save error:', err)
+      setError(`Failed to save: ${err instanceof Error ? err.message : 'Unknown error'}`)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto">
@@ -138,6 +201,12 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
             {success && !error && (
               <div className="p-4 bg-green-100 border border-green-200 rounded-md">
                 <p className="text-green-800 text-sm">Conversion completed successfully!</p>
+              </div>
+            )}
+
+            {saveSuccess && (
+              <div className="p-4 bg-blue-100 border border-blue-200 rounded-md">
+                <p className="text-blue-800 text-sm">Successfully saved to database!</p>
               </div>
             )}
           </div>
@@ -190,6 +259,19 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
             </div>
           </div>
         </div>
+        
+        {/* Save to Database Button */}
+        {jsonOutput && xmlOutput && (
+          <div className="mt-6 text-center">
+            <button
+              onClick={handleSaveToDatabase}
+              disabled={isSaving || (jsonOutput.startsWith('Error') && xmlOutput.startsWith('Error'))}
+              className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
+            >
+              {isSaving ? 'Saving...' : 'Save to Database'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

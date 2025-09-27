@@ -5,6 +5,7 @@ Conversions router for saving and managing converted HL7 data
 from fastapi import APIRouter, HTTPException, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.exc import IntegrityError
 from typing import Optional
 import logging
 import uuid
@@ -63,6 +64,18 @@ async def save_conversion(
             conversion_id=str(saved_conversion.id)
         )
         
+    except IntegrityError as e:
+        await db.rollback()
+        # Check if this is a duplicate HL7 content error
+        if "ix_saved_conversions_original_hl7_content_hash" in str(e):
+            logger.warning(f"Attempted to save duplicate HL7 content")
+            raise HTTPException(
+                status_code=409,
+                detail="This HL7 message has already been saved. Each HL7 message can only be saved once."
+            )
+        else:
+            logger.error(f"Database integrity error: {e}")
+            raise HTTPException(status_code=500, detail=f"Database integrity error: {str(e)}")
     except HTTPException:
         raise
     except Exception as e:
