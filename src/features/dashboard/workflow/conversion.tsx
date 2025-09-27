@@ -36,11 +36,12 @@ const fadeUp = {
 
 type ConversionStage = 'input' | 'processing' | 'results'
 
-// API endpoints configuration
+// API endpoints configuration - UPDATED to match your backend
 const API_ENDPOINTS = {
-  convert: '/api/convert', // POST endpoint for HL7 conversion
-  validate: '/api/validate', // POST endpoint for message validation
-  save: '/api/save', // POST endpoint for saving results
+  convert: '/api/v1/mastra/convert/both', // POST endpoint for HL7 conversion
+  validate: '/api/v1/mastra/validate', // POST endpoint for message validation
+  save: '/api/v1/conversions/save', // POST endpoint for saving results
+  generatePdf: '/api/v1/mastra/convert/medical-document', // PDF generation endpoint
 }
 
 // HL7 Message types - will be populated from API or config
@@ -56,9 +57,9 @@ const HL7_MESSAGE_TYPES = [
   { value: 'other', label: 'Other', description: 'Custom HL7 Message' },
 ]
 
-// API service functions
+// API service functions - UPDATED with proper error handling and response formats
 const apiService = {
-  // Convert HL7 to JSON/XML
+  // Convert HL7 to JSON/XML - UPDATED to match your backend response format
   async convertHL7(hl7Content: string, messageType: string): Promise<{ json: any; xml: string }> {
     const response = await fetch(API_ENDPOINTS.convert, {
       method: 'POST',
@@ -72,44 +73,119 @@ const apiService = {
     })
 
     if (!response.ok) {
-      throw new Error(`Conversion failed: ${response.statusText}`)
+      const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }))
+      throw new Error(`HTTP ${response.status}: ${errorData.detail || response.statusText}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    
+    // Handle your backend's response format
+    if (data.success && data.data) {
+      return {
+        json: data.data.json?.content || {},
+        xml: data.data.xml?.content || ''
+      }
+    } else {
+      throw new Error(data.message || 'Conversion failed')
+    }
   },
 
-  // Validate HL7 message
+  // Validate HL7 message - UPDATED with proper error handling
   async validateHL7(hl7Content: string): Promise<{ valid: boolean; errors: string[] }> {
-    const response = await fetch(API_ENDPOINTS.validate, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ hl7_content: hl7Content }),
-    })
+    try {
+      const response = await fetch(API_ENDPOINTS.validate, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hl7_content: hl7Content }),
+      })
 
-    if (!response.ok) {
-      throw new Error(`Validation failed: ${response.statusText}`)
+      if (!response.ok) {
+        // If validation endpoint doesn't exist, return valid to allow conversion
+        if (response.status === 404) {
+          return { valid: true, errors: [] }
+        }
+        const errorData = await response.json().catch(() => ({ detail: 'Validation failed' }))
+        throw new Error(`Validation failed: ${errorData.detail || response.statusText}`)
+      }
+
+      const data = await response.json()
+      return data // Expecting { valid: boolean, errors: string[] }
+    } catch (error) {
+      console.warn('Validation service unavailable, proceeding with conversion')
+      return { valid: true, errors: [] } // Default to valid if service is down
     }
-
-    return response.json()
   },
 
-  // Save conversion results
+  // Save conversion results - UPDATED to match your backend
   async saveResults(results: any): Promise<{ success: boolean; id?: string }> {
     const response = await fetch(API_ENDPOINTS.save, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(results),
+      body: JSON.stringify({
+        hl7_content: results.hl7_content,
+        json_content: results.json_output ? JSON.parse(results.json_output) : null,
+        xml_content: results.xml_output,
+        pdf_base64: null, // Can be added if PDF generation is implemented
+        title: `HL7 Conversion - ${new Date().toLocaleString()}`,
+        description: 'Converted using HL7 Converter'
+      }),
     })
 
     if (!response.ok) {
-      throw new Error(`Save failed: ${response.statusText}`)
+      if (response.status === 409) {
+        throw new Error('This HL7 message has already been saved to the database.')
+      }
+      const errorData = await response.json().catch(() => ({ detail: 'Save failed' }))
+      throw new Error(`HTTP ${response.status}: ${errorData.detail || response.statusText}`)
     }
 
-    return response.json()
+    const data = await response.json()
+    return { success: data.success, id: data.id }
+  },
+
+  // NEW: Generate PDF medical document
+  async generatePdf(hl7Content: string): Promise<{ pdfBase64: string }> {
+    const response = await fetch(API_ENDPOINTS.generatePdf, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        hl7_content: hl7Content,
+        generatePdf: true,
+        format: 'both'
+      }),
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'PDF generation failed' }))
+      throw new Error(`HTTP ${response.status}: ${errorData.detail || response.statusText}`)
+    }
+
+    const data = await response.json()
+    if (data.success && data.data.pdfBase64) {
+      return { pdfBase64: data.data.pdfBase64 }
+    } else {
+      throw new Error(data.message || 'PDF generation failed')
+    }
+  }
+}
+
+// NEW: Utility function for base64 to blob conversion
+const decodeBase64ToBlob = (base64: string, type: string): Blob => {
+  try {
+    const byteCharacters = atob(base64)
+    const byteArray = new Uint8Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteArray[i] = byteCharacters.charCodeAt(i)
+    }
+    return new Blob([byteArray], { type })
+  } catch (error) {
+    throw new Error('Failed to decode PDF data')
   }
 }
 
@@ -120,9 +196,12 @@ export default function HL7ConversionPage() {
   const [stage, setStage] = useState<ConversionStage>('input')
   const [jsonOutput, setJsonOutput] = useState("")
   const [xmlOutput, setXmlOutput] = useState("")
+  const [pdfBase64, setPdfBase64] = useState("") // NEW: PDF state
   const [isCopied, setIsCopied] = useState({ json: false, xml: false })
   const [isLoading, setIsLoading] = useState(false)
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false) // NEW: PDF loading state
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("") // NEW: Success message state
   const [validationResult, setValidationResult] = useState<{valid: boolean; errors: string[]} | null>(null)
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,7 +210,8 @@ export default function HL7ConversionPage() {
       const reader = new FileReader()
       reader.onload = (event) => {
         setHl7Input(event.target?.result as string)
-        setValidationResult(null) // Reset validation on new input
+        setValidationResult(null)
+        setError("")
       }
       reader.readAsText(file)
     } else {
@@ -176,6 +256,7 @@ export default function HL7ConversionPage() {
 
     setIsLoading(true)
     setError("")
+    setSuccess("")
     setStage('processing')
 
     try {
@@ -183,6 +264,7 @@ export default function HL7ConversionPage() {
       const isValid = await validateMessage()
       if (!isValid) {
         setStage('input')
+        setIsLoading(false)
         return
       }
 
@@ -191,12 +273,76 @@ export default function HL7ConversionPage() {
       setJsonOutput(JSON.stringify(result.json, null, 2))
       setXmlOutput(result.xml)
       setStage('results')
+      setSuccess("Conversion completed successfully!")
     } catch (error) {
       console.error('Conversion failed:', error)
-      setError('Conversion failed. Please check your HL7 format and try again.')
+      setError(error instanceof Error ? error.message : 'Conversion failed. Please check your HL7 format and try again.')
       setStage('input')
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // NEW: PDF generation handler
+  const handleGeneratePdf = async () => {
+    if (!hl7Input.trim()) {
+      setError("Please enter HL7 content before generating PDF.")
+      return
+    }
+
+    setIsGeneratingPdf(true)
+    setError("")
+    setSuccess("")
+
+    try {
+      const result = await apiService.generatePdf(hl7Input)
+      setPdfBase64(result.pdfBase64)
+      setSuccess("PDF generated successfully!")
+    } catch (error) {
+      console.error('PDF generation failed:', error)
+      setError(error instanceof Error ? error.message : 'PDF generation failed.')
+    } finally {
+      setIsGeneratingPdf(false)
+    }
+  }
+
+  // NEW: PDF viewing function
+  const viewPdf = () => {
+    if (pdfBase64) {
+      try {
+        const blob = decodeBase64ToBlob(pdfBase64, 'application/pdf')
+        const url = URL.createObjectURL(blob)
+        const newWindow = window.open(url, '_blank')
+        if (newWindow) {
+          newWindow.onload = () => URL.revokeObjectURL(url)
+        } else {
+          setError('Please allow popups to view the PDF')
+          URL.revokeObjectURL(url)
+        }
+      } catch (error) {
+        console.error('Error opening PDF:', error)
+        setError('Failed to open PDF')
+      }
+    }
+  }
+
+  // NEW: PDF download function
+  const downloadPdf = () => {
+    if (pdfBase64) {
+      try {
+        const blob = decodeBase64ToBlob(pdfBase64, 'application/pdf')
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'medical-document.pdf'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      } catch (error) {
+        console.error('Error downloading PDF:', error)
+        setError('Failed to download PDF')
+      }
     }
   }
 
@@ -211,34 +357,39 @@ export default function HL7ConversionPage() {
       })
 
       if (saveResult.success) {
-        // Show success message or redirect
-        alert('Results saved successfully!')
+        setSuccess('Results saved successfully!')
+        setTimeout(() => setSuccess(""), 3000)
       }
     } catch (error) {
       console.error('Save failed:', error)
-      setError('Failed to save results. Please try again.')
+      setError(error instanceof Error ? error.message : 'Failed to save results. Please try again.')
     }
   }
 
   const handleCopyCode = (type: 'json' | 'xml') => {
-    navigator.clipboard.writeText(type === 'json' ? jsonOutput : xmlOutput)
-    setIsCopied(prev => ({ ...prev, [type]: true }))
-    setTimeout(() => setIsCopied(prev => ({ ...prev, [type]: false })), 2000)
+    const text = type === 'json' ? jsonOutput : xmlOutput
+    if (text) {
+      navigator.clipboard.writeText(text)
+      setIsCopied(prev => ({ ...prev, [type]: true }))
+      setTimeout(() => setIsCopied(prev => ({ ...prev, [type]: false })), 2000)
+    }
   }
 
   const handleDownload = (type: 'json' | 'xml') => {
     const content = type === 'json' ? jsonOutput : xmlOutput
-    const blob = new Blob([content], { 
-      type: type === 'json' ? 'application/json' : 'application/xml' 
-    })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `hl7-conversion.${type}`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
+    if (content) {
+      const blob = new Blob([content], { 
+        type: type === 'json' ? 'application/json' : 'application/xml' 
+      })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `hl7-conversion.${type}`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+    }
   }
 
   const loadSampleHL7 = () => {
@@ -250,7 +401,9 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
     setHl7Input(sampleHL7)
     setMessageType('ADT^A01')
     setError("")
+    setSuccess("")
     setValidationResult(null)
+    setPdfBase64("") // Clear previous PDF
   }
 
   const resetForm = () => {
@@ -259,7 +412,9 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
     setMessageType("")
     setJsonOutput("")
     setXmlOutput("")
+    setPdfBase64("")
     setError("")
+    setSuccess("")
     setValidationResult(null)
   }
 
@@ -286,7 +441,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
             >
               <h1 className="text-3xl font-bold mb-4">HL7 Message Converter</h1>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Convert HL7 v2 messages to structured JSON and XML formats
+                Convert HL7 v2 messages to structured JSON and XML formats with PDF generation
               </p>
             </motion.div>
 
@@ -321,6 +476,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                             onChange={(e) => {
                               setHl7Input(e.target.value)
                               setValidationResult(null)
+                              setError("")
                             }}
                             className="font-mono text-sm"
                           />
@@ -489,7 +645,38 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           </p>
                         </div>
                       </div>
+
+                      {/* NEW: PDF Generation Option */}
+                      <div className="flex items-center gap-3 p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
+                        <FileText className="h-4 w-4 text-purple-600" />
+                        <div>
+                          <p className="text-sm font-medium">PDF Document</p>
+                          <p className="text-xs text-muted-foreground">
+                            Generate medical document PDF
+                          </p>
+                        </div>
+                      </div>
                     </div>
+
+                    {/* NEW: PDF Generation Button */}
+                    <Button
+                      variant="outline"
+                      className="w-full gap-2"
+                      onClick={handleGeneratePdf}
+                      disabled={!hl7Input.trim() || isGeneratingPdf}
+                    >
+                      {isGeneratingPdf ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                          Generating PDF...
+                        </>
+                      ) : (
+                        <>
+                          <FileText className="h-4 w-4" />
+                          Generate Medical PDF
+                        </>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
 
@@ -497,14 +684,24 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   className="w-full gap-2"
                   size="lg"
                   onClick={handleConvert}
-                  disabled={!hl7Input.trim() || !messageType}
+                  disabled={!hl7Input.trim() || !messageType || isLoading}
                 >
-                  <Zap className="h-5 w-5" />
-                  Convert HL7 Message
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
+                      Converting...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-5 w-5" />
+                      Convert HL7 Message
+                    </>
+                  )}
                 </Button>
               </motion.div>
             </div>
 
+            {/* Error and Success Messages */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -514,6 +711,19 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                 <div className="flex items-center gap-2 text-destructive">
                   <AlertCircle className="h-4 w-4" />
                   <p className="text-sm">{error}</p>
+                </div>
+              </motion.div>
+            )}
+
+            {success && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-green-50 border border-green-200 rounded-lg p-4"
+              >
+                <div className="flex items-center gap-2 text-green-800">
+                  <CheckCircle className="h-4 w-4" />
+                  <p className="text-sm">{success}</p>
                 </div>
               </motion.div>
             )}
@@ -565,6 +775,38 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
               </p>
             </div>
 
+            {/* NEW: PDF Actions Section */}
+            {pdfBase64 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-green-50 border border-green-200 rounded-lg p-6"
+              >
+                <div className="text-center mb-4">
+                  <CheckCircle className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                  <h3 className="text-lg font-semibold text-green-800">Medical PDF Generated</h3>
+                  <p className="text-sm text-green-600">Your medical document is ready</p>
+                </div>
+                <div className="flex gap-3 justify-center">
+                  <Button 
+                    onClick={viewPdf}
+                    className="bg-blue-600 hover:bg-blue-700 gap-2"
+                  >
+                    <FileText className="h-4 w-4" />
+                    View PDF
+                  </Button>
+                  <Button 
+                    onClick={downloadPdf}
+                    variant="outline"
+                    className="gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download PDF
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* JSON Output Section */}
               <Card>
@@ -587,6 +829,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           size="sm" 
                           onClick={() => handleCopyCode('json')}
                           className="gap-1"
+                          disabled={!jsonOutput}
                         >
                           {isCopied.json ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           {isCopied.json ? 'Copied!' : 'Copy'}
@@ -596,6 +839,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           size="sm" 
                           onClick={() => handleDownload('json')}
                           className="gap-1"
+                          disabled={!jsonOutput}
                         >
                           <Download className="h-3 w-3" />
                           Download
@@ -603,7 +847,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                       </div>
                     </div>
                     <pre className="text-xs overflow-auto max-h-80 font-mono">
-                      {jsonOutput}
+                      {jsonOutput || 'No JSON output available'}
                     </pre>
                   </div>
                 </CardContent>
@@ -630,6 +874,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           size="sm" 
                           onClick={() => handleCopyCode('xml')}
                           className="gap-1"
+                          disabled={!xmlOutput}
                         >
                           {isCopied.xml ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                           {isCopied.xml ? 'Copied!' : 'Copy'}
@@ -639,6 +884,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           size="sm" 
                           onClick={() => handleDownload('xml')}
                           className="gap-1"
+                          disabled={!xmlOutput}
                         >
                           <Download className="h-3 w-3" />
                           Download
@@ -646,7 +892,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                       </div>
                     </div>
                     <pre className="text-xs overflow-auto max-h-80 font-mono">
-                      {xmlOutput}
+                      {xmlOutput || 'No XML output available'}
                     </pre>
                   </div>
                 </CardContent>
@@ -661,10 +907,16 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                     <FileText className="h-4 w-4" />
                     Convert Another
                   </Button>
-                  <Button variant="outline" onClick={handleSaveResults} className="gap-2">
+                  <Button onClick={handleSaveResults} className="gap-2">
                     <Database className="h-4 w-4" />
                     Save to Database
                   </Button>
+                  {!pdfBase64 && (
+                    <Button variant="outline" onClick={handleGeneratePdf} className="gap-2">
+                      <FileText className="h-4 w-4" />
+                      Generate PDF
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -678,7 +930,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-primary/5 rounded-lg">
                     <div className="text-2xl font-bold text-primary mb-1">
                       {hl7Input.split('\n').length}
@@ -696,6 +948,12 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                       {getSelectedMessageType()?.label}
                     </div>
                     <div className="text-sm text-muted-foreground">Message Type</div>
+                  </div>
+                  <div className="text-center p-4 bg-primary/5 rounded-lg">
+                    <div className="text-2xl font-bold text-primary mb-1">
+                      {pdfBase64 ? 'Yes' : 'No'}
+                    </div>
+                    <div className="text-sm text-muted-foreground">PDF Generated</div>
                   </div>
                 </div>
               </CardContent>

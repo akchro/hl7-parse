@@ -75,7 +75,7 @@ export default function HL7Dashboard() {
 
   const handleNewConversion = () => {
     // Navigate to conversion page
-    window.location.href = '/workflow'
+    window.location.href = '/hl7-converter'
   }
 
   return (
