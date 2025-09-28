@@ -89,6 +89,20 @@ if (!rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
+        <div className="absolute inset-0 -z-30">
+          <video
+            src="bg3.mp4"
+            autoPlay
+            loop
+            playsInline
+            muted
+            className="h-screen w-screen object-cover"
+          />
+          <div className="
+    pointer-events-none absolute inset-0
+    bg-[radial-gradient(ellipse_at_center,transparent_62%,white_100%)]
+  " />
+        </div>
         <ThemeProvider defaultTheme='light' storageKey='vite-ui-theme'>
           <FontProvider>
             <RouterProvider router={router} />
