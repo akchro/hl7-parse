@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -28,12 +28,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'mastra-hl7-service' });
 });
 
 // HL7 conversion endpoint - both formats
-app.post('/convert-hl7', async (req, res) => {
+app.post('/convert-hl7', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -138,7 +138,7 @@ Return only valid XML without any markdown formatting or additional text.
 });
 
 // JSON-only conversion endpoint
-app.post('/convert-hl7/json', async (req, res) => {
+app.post('/convert-hl7/json', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -202,7 +202,7 @@ Return only valid JSON without any markdown formatting or additional text.
 });
 
 // XML-only conversion endpoint
-app.post('/convert-hl7/xml', async (req, res) => {
+app.post('/convert-hl7/xml', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -263,7 +263,7 @@ if (!fs.existsSync(outputDir)) {
 }
 
 // HL7 to Plain English endpoint
-app.post('/convert-hl7/plain-english', async (req, res) => {
+app.post('/convert-hl7/plain-english', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -293,7 +293,7 @@ app.post('/convert-hl7/plain-english', async (req, res) => {
 });
 
 // HL7 to LaTeX endpoint
-app.post('/convert-hl7/latex', async (req, res) => {
+app.post('/convert-hl7/latex', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -325,7 +325,7 @@ app.post('/convert-hl7/latex', async (req, res) => {
 });
 
 // HL7 to Medical Document (PDF) endpoint
-app.post('/convert-hl7/medical-document', async (req, res) => {
+app.post('/convert-hl7/medical-document', async (req: Request, res: Response) => {
   try {
     const { hl7Content, generatePdf = false, format = 'both' } = req.body;
 
@@ -375,7 +375,7 @@ app.post('/convert-hl7/medical-document', async (req, res) => {
 });
 
 // Endpoint to download generated PDF files
-app.get('/download/pdf/:filename', (req, res) => {
+app.get('/download/pdf/:filename', (req: Request, res: Response) => {
   const { filename } = req.params;
   const filePath = path.join(outputDir, filename);
 
@@ -389,7 +389,7 @@ app.get('/download/pdf/:filename', (req, res) => {
 });
 
 // Medical Triage Analysis endpoint
-app.post('/triage-analysis', async (req, res) => {
+app.post('/triage-analysis', async (req: Request, res: Response) => {
   try {
     const { hl7Messages, hl7_messages, patientCount, patient_count } = req.body;
     const messages = hl7Messages || hl7_messages;
@@ -480,7 +480,7 @@ Return only valid JSON without markdown formatting.`;
     }
 
     // Sort results by severity score (highest first)
-    triageResults.results.sort((a, b) => b.severity_score - a.severity_score);
+    triageResults.results.sort((a: { severity_score: number }, b: { severity_score: number }) => b.severity_score - a.severity_score);
 
     res.json({
       success: true,
