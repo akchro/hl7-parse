@@ -20,7 +20,7 @@ services:
   mastra-service:
     build:
       context: ./mastra-service
-      dockerfile: Dockerfile.mastra
+      dockerfile: Dockerfile
     container_name: hl7-mastra
     environment:
       GOOGLE_GENERATIVE_AI_API_KEY: AIzaSyAOmh0Jegw90UjzF-nDy4c3PAIFMVE5Z6Q
