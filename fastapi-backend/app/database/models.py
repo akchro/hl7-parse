@@ -97,7 +97,11 @@ class SavedConversion(Base):
     # Converted formats
     json_content = Column(JSONB)
     xml_content = Column(Text)
+    plain_english = Column(Text)  # Plain text version of the HL7 message
+    latex_content = Column(Text)  # LaTeX formatted content
+    html_content = Column(Text)  # HTML formatted content
     pdf_base64 = Column(Text)  # Store PDF as base64 string
+    patient_name = Column(String(200))  # Patient name extracted from HL7
     
     # Metadata
     conversion_metadata = Column(JSONB)  # Store metadata from both conversions

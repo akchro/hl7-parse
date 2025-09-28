@@ -231,7 +231,7 @@ export function Patients() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ScrollArea className="h-[600px]">
+            <ScrollArea className="h-auto max-h-[800px]">
               <Table>
                 <TableHeader>
                   <TableRow>

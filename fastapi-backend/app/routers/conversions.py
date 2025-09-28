@@ -39,15 +39,19 @@ async def save_conversion(
             raise HTTPException(status_code=400, detail="HL7 content is required")
         
         # Validate that we have at least one converted format
-        if not request.json_content and not request.xml_content and not request.pdf_base64:
-            raise HTTPException(status_code=400, detail="At least one converted format (JSON, XML, or PDF) is required")
+        if not request.json_content and not request.xml_content and not request.pdf_base64 and not request.plain_english:
+            raise HTTPException(status_code=400, detail="At least one converted format (JSON, XML, PDF, or Plain text) is required")
         
         # Create new SavedConversion record
         saved_conversion = SavedConversion(
             original_hl7_content=request.hl7_content,
             json_content=request.json_content,
             xml_content=request.xml_content,
+            plain_english=request.plain_english,
+            latex_content=request.latex_content,
+            html_content=request.html_content,
             pdf_base64=request.pdf_base64,
+            patient_name=request.patient_name,
             conversion_metadata=request.conversion_metadata,
             title=request.title,
             description=request.description,
@@ -132,7 +136,11 @@ async def list_saved_conversions(
                 original_hl7_content=conv.original_hl7_content,
                 json_content=conv.json_content,
                 xml_content=conv.xml_content,
+                plain_english=conv.plain_english,
+                latex_content=conv.latex_content,
+                html_content=conv.html_content,
                 pdf_base64=conv.pdf_base64,
+                patient_name=conv.patient_name,
                 conversion_metadata=conv.conversion_metadata,
                 user_id=conv.user_id,
                 created_at=conv.created_at,
@@ -182,7 +190,11 @@ async def get_saved_conversion(
             original_hl7_content=conversion.original_hl7_content,
             json_content=conversion.json_content,
             xml_content=conversion.xml_content,
+            plain_english=conversion.plain_english,
+            latex_content=conversion.latex_content,
+            html_content=conversion.html_content,
             pdf_base64=conversion.pdf_base64,
+            patient_name=conversion.patient_name,
             conversion_metadata=conversion.conversion_metadata,
             user_id=conversion.user_id,
             created_at=conversion.created_at,
@@ -272,6 +284,73 @@ async def get_json_content(
     except Exception as e:
         logger.error(f"Error getting JSON content: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get JSON content: {str(e)}")
+
+@router.put("/{conversion_id}", response_model=SavedConversionResponse)
+async def update_conversion(
+    conversion_id: str,
+    request: SaveConversionRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update an entire saved conversion by ID
+    """
+    try:
+        # Validate UUID format
+        try:
+            uuid.UUID(conversion_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid conversion ID format")
+        
+        # Query for the conversion
+        query = select(SavedConversion).where(SavedConversion.id == conversion_id)
+        result = await db.execute(query)
+        conversion = result.scalar_one_or_none()
+        
+        if not conversion:
+            raise HTTPException(status_code=404, detail="Conversion not found")
+        
+        # Update all fields
+        conversion.title = request.title
+        conversion.description = request.description
+        conversion.original_hl7_content = request.hl7_content
+        conversion.json_content = request.json_content
+        conversion.xml_content = request.xml_content
+        conversion.plain_english = request.plain_english
+        conversion.latex_content = request.latex_content
+        conversion.html_content = request.html_content
+        conversion.pdf_base64 = request.pdf_base64
+        conversion.patient_name = request.patient_name
+        
+        # The updated_at field will be automatically updated by the database
+        await db.commit()
+        await db.refresh(conversion)
+        
+        logger.info(f"Updated conversion ID: {conversion_id}")
+        
+        return SavedConversionResponse(
+            id=str(conversion.id),
+            title=conversion.title,
+            description=conversion.description,
+            original_hl7_content=conversion.original_hl7_content,
+            json_content=conversion.json_content,
+            xml_content=conversion.xml_content,
+            plain_english=conversion.plain_english,
+            latex_content=conversion.latex_content,
+            html_content=conversion.html_content,
+            pdf_base64=conversion.pdf_base64,
+            patient_name=conversion.patient_name,
+            conversion_metadata=conversion.conversion_metadata,
+            user_id=conversion.user_id,
+            created_at=conversion.created_at,
+            updated_at=conversion.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating conversion: {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update conversion: {str(e)}")
 
 @router.put("/{conversion_id}/json", response_model=JsonContentResponse)
 async def update_json_content(

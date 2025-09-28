@@ -42,6 +42,7 @@ interface SavedConversion {
   original_hl7_content: string
   json_content?: Record<string, any>
   xml_content?: string
+  plain_english?: string
   conversion_metadata?: Record<string, any>
   user_id?: string
   created_at: string
@@ -120,7 +121,7 @@ export function Analytics() {
 
   const handleContentChange = (
     content: string,
-    format: 'hl7' | 'json' | 'xml'
+    format: 'hl7' | 'json' | 'xml' | 'plain'
   ) => {
     if (!editedConversion) return
 
@@ -131,6 +132,7 @@ export function Analytics() {
         json_content: content ? JSON.parse(content) : null,
       }),
       ...(format === 'xml' && { xml_content: content }),
+      ...(format === 'plain' && { plain_english: content }),
     })
   }
 
@@ -154,6 +156,7 @@ export function Analytics() {
             original_hl7_content: editedConversion.original_hl7_content,
             json_content: editedConversion.json_content,
             xml_content: editedConversion.xml_content,
+            plain_english: editedConversion.plain_english,
           }),
         }
       )
@@ -229,7 +232,7 @@ export function Analytics() {
     }
   }
 
-  const handleDownload = (format: 'hl7' | 'json' | 'xml') => {
+  const handleDownload = (format: 'hl7' | 'json' | 'xml' | 'plain') => {
     if (!selectedConversion) return
 
     let content = ''
@@ -252,6 +255,11 @@ export function Analytics() {
         content = selectedConversion.xml_content || ''
         filename += '.xml'
         mimeType = 'application/xml'
+        break
+      case 'plain':
+        content = selectedConversion.plain_english || ''
+        filename += '.txt'
+        mimeType = 'text/plain'
         break
     }
 
@@ -560,7 +568,7 @@ export function Analytics() {
                     onValueChange={setActiveTab}
                     className='space-y-4'
                   >
-                    <TabsList className='grid w-full grid-cols-4'>
+                    <TabsList className='grid w-full grid-cols-5'>
                       <TabsTrigger value='overview'>Overview</TabsTrigger>
                       <TabsTrigger value='hl7'>HL7 Content</TabsTrigger>
                       <TabsTrigger
@@ -574,6 +582,12 @@ export function Analytics() {
                         disabled={!selectedConversion.xml_content}
                       >
                         XML
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value='plain'
+                        disabled={!selectedConversion.plain_english}
+                      >
+                        Plain text
                       </TabsTrigger>
                     </TabsList>
 
@@ -626,6 +640,9 @@ export function Analytics() {
                                   {selectedConversion.xml_content && (
                                     <Badge variant='secondary'>XML</Badge>
                                   )}
+                                  {selectedConversion.plain_english && (
+                                    <Badge variant='secondary'>Plain text</Badge>
+                                  )}
                                 </div>
                               </div>
                               <div>
@@ -675,6 +692,15 @@ export function Analytics() {
                           >
                             <Download className='mr-2 h-4 w-4' />
                             Download XML
+                          </Button>
+                        )}
+                        {selectedConversion.plain_english && (
+                          <Button
+                            onClick={() => handleDownload('plain')}
+                            variant='outline'
+                          >
+                            <Download className='mr-2 h-4 w-4' />
+                            Download Plain text
                           </Button>
                         )}
                       </div>
@@ -816,6 +842,33 @@ export function Analytics() {
                               <pre className='font-mono text-sm'>
                                 {selectedConversion.xml_content}
                               </pre>
+                            </ScrollArea>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+
+                    {/* Plain text Tab */}
+                    <TabsContent value='plain'>
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Plain Text Content</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {isEditing ? (
+                            <Textarea
+                              value={editedConversion?.plain_english || ''}
+                              onChange={(e) =>
+                                handleContentChange(e.target.value, 'plain')
+                              }
+                              className='min-h-[400px] text-sm'
+                              placeholder='Plain text content...'
+                            />
+                          ) : (
+                            <ScrollArea className='h-[400px]'>
+                              <div className='whitespace-pre-wrap text-sm'>
+                                {selectedConversion.plain_english}
+                              </div>
                             </ScrollArea>
                           )}
                         </CardContent>
