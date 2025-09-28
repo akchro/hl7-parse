@@ -75,7 +75,7 @@ export default function HL7Dashboard() {
           >
             {/* Conversion Button */}
             <LiquidGlass className="flex-1 cursor-pointer" onClick={handleNewConversion} cornerRadius={30} elasticity={0.05} displacementScale={25} blurAmount={0}
-                         style={{position: 'relative', top:200, left:80}}
+                         style={{position: 'relative', top:200, left:100}}
             >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-blue-100 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
@@ -100,7 +100,7 @@ export default function HL7Dashboard() {
 
             {/* Triage Button */}
             <LiquidGlass className="flex-1 cursor-pointer group" onClick={handleTriage} cornerRadius={30} elasticity={0.05} displacementScale={25} blurAmount={0}
-                         style={{position:"relative", top:200, right:80}}
+                         style={{position:"relative", top:200, right:20}}
             >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
