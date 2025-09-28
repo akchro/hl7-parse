@@ -16,7 +16,9 @@ from app.models.conversion_models import (
     SaveConversionRequest, 
     SaveConversionResponse, 
     SavedConversionResponse,
-    SavedConversionListResponse
+    SavedConversionListResponse,
+    UpdateJsonContentRequest,
+    JsonContentResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -230,3 +232,94 @@ async def delete_saved_conversion(
         logger.error(f"Error deleting saved conversion: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to delete conversion: {str(e)}")
+
+@router.get("/{conversion_id}/json", response_model=JsonContentResponse)
+async def get_json_content(
+    conversion_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get only the JSON content of a specific saved conversion by ID
+    """
+    try:
+        # Validate UUID format
+        try:
+            uuid.UUID(conversion_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid conversion ID format")
+        
+        # Query for the conversion
+        query = select(SavedConversion).where(SavedConversion.id == conversion_id)
+        result = await db.execute(query)
+        conversion = result.scalar_one_or_none()
+        
+        if not conversion:
+            raise HTTPException(status_code=404, detail="Conversion not found")
+        
+        return JsonContentResponse(
+            id=str(conversion.id),
+            json_content=conversion.json_content,
+            title=conversion.title,
+            description=conversion.description,
+            updated_at=conversion.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting JSON content: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get JSON content: {str(e)}")
+
+@router.put("/{conversion_id}/json", response_model=JsonContentResponse)
+async def update_json_content(
+    conversion_id: str,
+    request: UpdateJsonContentRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update the JSON content of a specific saved conversion by ID
+    """
+    try:
+        # Validate UUID format
+        try:
+            uuid.UUID(conversion_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid conversion ID format")
+        
+        # Query for the conversion
+        query = select(SavedConversion).where(SavedConversion.id == conversion_id)
+        result = await db.execute(query)
+        conversion = result.scalar_one_or_none()
+        
+        if not conversion:
+            raise HTTPException(status_code=404, detail="Conversion not found")
+        
+        # Update the conversion
+        conversion.json_content = request.json_content
+        
+        # Update title and description if provided
+        if request.title is not None:
+            conversion.title = request.title
+        if request.description is not None:
+            conversion.description = request.description
+        
+        # The updated_at field will be automatically updated by the database
+        await db.commit()
+        await db.refresh(conversion)
+        
+        logger.info(f"Updated JSON content for conversion ID: {conversion_id}")
+        
+        return JsonContentResponse(
+            id=str(conversion.id),
+            json_content=conversion.json_content,
+            title=conversion.title,
+            description=conversion.description,
+            updated_at=conversion.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating JSON content: {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update JSON content: {str(e)}")
