@@ -408,9 +408,9 @@ export function Analytics() {
           </Alert>
         )}
 
-        <div className='grid grid-cols-1 items-start gap-6 lg:grid-cols-[240px_minmax(0,1fr)]'>
+        <div className='grid grid-cols-1 items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]'>
           {/* Conversions List Sidebar */}
-          <div className='w-full'>
+          <div className='w-full flex-shrink-0 lg:w-[260px]'>
             <Card className='w-full'>
               <CardHeader className='p-4'>
                 <CardTitle className='text-sm'>Saved Conversions</CardTitle>
@@ -421,7 +421,7 @@ export function Analytics() {
               </CardHeader>
               <CardContent className='p-0'>
                 <ScrollArea className='h-[600px] w-full'>
-                  <div className='space-y-1 px-2 py-2'>
+                  <div className='flex flex-col gap-1 px-2 py-2'>
                     {conversions.map((conversion) => {
                       const { patientName } = getPatientInfoFromHL7(
                         conversion.original_hl7_content
@@ -430,32 +430,36 @@ export function Analytics() {
                         selectedConversion?.id === conversion.id
 
                       return (
-                        <motion.div
-                          key={conversion.id}
-                          whileHover={{ scale: 1.005 }}
-                          whileTap={{ scale: 0.995 }}
-                          className='origin-center'
-                        >
+                        <div key={conversion.id} className='w-full'>
                           <Card
-                            className={`w-full cursor-pointer overflow-hidden transition-colors ${
+                            data-selected={isSelected ? 'true' : 'false'}
+                            className={`group w-full cursor-pointer overflow-hidden border transition-colors focus-visible:ring-1 focus-visible:outline-none ${
                               isSelected
-                                ? 'bg-muted border-primary'
-                                : 'hover:bg-muted/50'
+                                ? 'bg-muted/70 border-primary'
+                                : 'hover:bg-muted/40'
                             }`}
                             onClick={() => handleConversionSelect(conversion)}
                           >
                             <CardContent className='px-3 py-2'>
                               <div className='flex w-full items-start gap-2'>
                                 <User className='text-muted-foreground mt-0.5 h-3 w-3 shrink-0' />
-                                <div className='min-w-0 flex-1'>
-                                  <p className='truncate text-sm font-medium'>
+                                <div className='min-w-0 flex-1 space-y-0.5'>
+                                  <p
+                                    className='truncate text-sm font-medium'
+                                    title={patientName}
+                                  >
                                     {patientName}
                                   </p>
-                                  <p className='text-muted-foreground truncate text-[11px]'>
+                                  <p
+                                    className='text-muted-foreground truncate text-[11px]'
+                                    title={
+                                      conversion.title || 'Untitled Conversion'
+                                    }
+                                  >
                                     {conversion.title || 'Untitled Conversion'}
                                   </p>
-                                  <div className='mt-1 flex items-center gap-1'>
-                                    <Calendar className='h-3 w-3 shrink-0' />
+                                  <div className='flex items-center gap-1'>
+                                    <Calendar className='text-muted-foreground h-3 w-3 shrink-0' />
                                     <span className='text-muted-foreground text-[10px]'>
                                       {new Date(
                                         conversion.created_at
@@ -484,9 +488,15 @@ export function Analytics() {
                               </div>
                             </CardContent>
                           </Card>
-                        </motion.div>
+                        </div>
                       )
                     })}
+
+                    {conversions.length === 0 && (
+                      <div className='text-muted-foreground py-8 text-center text-xs'>
+                        No conversions found
+                      </div>
+                    )}
                   </div>
                 </ScrollArea>
               </CardContent>
