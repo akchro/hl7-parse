@@ -1,17 +1,17 @@
-# HL7 LiteBoard
+# Prism
 
-A lightweight, clinician-friendly solution that ingests HL7 data streams and presents them in a digestible, editable, and exportable format. Built for healthcare professionals to bridge the gap between complex HL7 standards and daily clinical workflows. The platform also supports AI-powered conversion into clean, interactive formats (XML, JSON, PDF).
+A lightweight, clinician-friendly solution that transforms complex HL7 data streams into digestible, editable, and exportable formats. Built for healthcare professionals to bridge the gap between technical HL7 standards and daily clinical workflows. The platform supports AI-powered conversion into clean, interactive formats (XML, JSON, PDF).
 
 ---
 
-## 🚀 Overview
+##  Overview
 
-HL7 LiteBoard translates complex HL7 v2 messages into a clean, interactive dashboard, allowing healthcare professionals to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML).  
+Prism translates complex HL7 v2 messages into a clean, interactive dashboard, allowing healthcare professionals to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML).  
 This tool reduces intake and discharge times while lowering integration costs for healthcare systems.
 
 ---
 
-## 🏥 Problem Statement
+##  Problem Statement
 
 - **Complexity of HL7**: HL7 v2 is the backbone of healthcare interoperability, but its structure is highly technical and difficult for non-technical users to interpret.  
 - **Cost of Integration**: Hospitals spend significant resources on interface engines and consultants to manage HL7 data.  
@@ -20,9 +20,9 @@ This tool reduces intake and discharge times while lowering integration costs fo
 
 ---
 
-## 💡 Solution
+##  Solution
 
-HL7 LiteBoard provides a simplified interface that:
+Prism provides a simplified interface that:
 
 - **Ingests** HL7 v2 messages (e.g., ADT for admissions, ORU for labs).  
 - **Transforms** and displays patient information in an intuitive dashboard.  
@@ -34,22 +34,22 @@ This system acts as a translation and interaction layer between hospital systems
 
 ---
 
-## 📋 System Overview
+##  System Overview
 
 ### Core Components
+- **React Frontend** (Port 5173) – Modern React app with shadcn/ui components  
 - **FastAPI Backend** (Port 8000) – HL7 processing API with comprehensive endpoints  
 - **PostgreSQL Database** (Port 5432) – HL7 schema with audit trails  
-- **Mock Mastra Service** (Port 3001) – AI agent simulation for format conversion  
+- **Mastra AI Service** (Port 3001) – AI-powered document conversion service  
 - **pgAdmin** (Port 8080) – Database management interface  
 
 ### Optional Components (via profiles)
 - **Prometheus** (Port 9090) – Metrics collection  
 - **Grafana** (Port 3000) – Dashboards and visualization  
-- **React Frontend** (Port 80) – Web UI (future)  
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ```
 
@@ -59,7 +59,7 @@ Validation    Processing    PostgreSQL   XML/JSON/PDF   Frontend Access
 
 ````
 
-LiteBoard also acts as middleware:  
+Prism also acts as middleware:  
 1. **Receives** HL7 v2 messages from hospital systems  
 2. **Parses** and transforms data into structured JSON  
 3. **Presents** information via a web interface  
@@ -68,69 +68,149 @@ LiteBoard also acts as middleware:
 
 ---
 
-## 🚀 Quick Start
+## Tech Stack
+
+### Frontend
+- **React 19** - Modern React with latest features
+- **TypeScript** - Type-safe development
+- **Vite** - Fast build tool and dev server
+- **TanStack Router** - Type-safe routing
+- **TanStack Query** - Server state management
+- **shadcn/ui** - Beautiful UI components
+- **Tailwind CSS** - Utility-first styling
+- **Framer Motion** - Smooth animations
+- **Clerk** - Authentication and user management
+- **Recharts** - Data visualization
+- **Zustand** - State management
+
+### Backend
+- **FastAPI** - Modern Python web framework
+- **PostgreSQL** - Relational database
+- **SQLAlchemy** - ORM for database operations
+- **Alembic** - Database migrations
+- **Pydantic** - Data validation
+
+### AI/ML Services
+- **Mastra** - AI agent framework for document processing
+- **TypeScript** - AI service implementation
+
+### Infrastructure
+- **Docker** - Containerization
+- **Docker Compose** - Multi-service orchestration
+- **Nginx** - Reverse proxy and static file serving
+- **pgAdmin** - Database administration
+
+---
+
+##  Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/hl7-liteboard.git
-cd hl7-liteboard
-````
+git clone <repository-url>
+cd hl7-parse
+```
 
-### Option 1: Development (Node.js frontend)
+### Option 1: Frontend Development
+
+For UI development and testing the React components:
 
 ```bash
-# Install dependencies
+# Install frontend dependencies
 npm install
 
 # Start development server
 npm run dev
-
 ```
 
-The app will be available at `http://localhost:5173`.
+The React app will be available at `http://localhost:5173`.
 
-### Option 2: Full System (Docker)
+**Note**: For full functionality, you'll need the backend services running (see Option 2).
+
+### Option 2: Full Stack Development (Docker)
+
+For complete HL7 processing functionality with all services:
 
 ```bash
-# Start core services
+# Start core services (Frontend, Backend, Database, AI Service)
 ./start.sh
 
-# Start with monitoring
+# Or start with monitoring (includes Prometheus & Grafana)
 ./start.sh --monitoring
 
-# Start everything
+# Or start everything (all services + monitoring)
 ./start.sh --all
 ```
 
-## 🧪 Testing
+### Option 3: Backend Development
 
-### Automated Testing
+For API development and testing:
 
 ```bash
-# Frontend unit tests
-npm test
+# Navigate to backend directory
+cd fastapi-backend
 
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the FastAPI server
+python run.py
+```
+
+API will be available at `http://localhost:8000`.
+
+##  Testing
+
+### Frontend Testing
+
+```bash
+# Install dependencies (if not already done)
+npm install
+
+# Run type checking
+npm run build
+
+# Run linting
+npm run lint
+
+# Format code
+npm run format
+```
+
+### Backend Testing
+
+```bash
 # API endpoint tests
 ./fastapi-backend/test-endpoints.sh
+
+# Or manually test API health
+curl http://localhost:8000/health
 ```
 
-### Manual Tests
+### Manual HL7 Testing
 
 ```bash
-# Process all sample files
+# Process all sample HL7 files
 curl -X POST http://localhost:8000/api/v1/samples/process-all
+
+# Upload and convert a specific HL7 file
+curl -X POST -F "file=@sample.hl7" http://localhost:8000/api/v1/upload
 ```
 
 
-## 📊 Access Points
+##  Access Points
 
+* **React Frontend**: [http://localhost:5173](http://localhost:5173)
 * **API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
 * **Backend Health**: [http://localhost:8000/health](http://localhost:8000/health)
 * **Database Admin**: [http://localhost:8080](http://localhost:8080) ([admin@hl7liteboard.com](mailto:admin@hl7liteboard.com) / admin123)
-* **Mock Mastra**: [http://localhost:3001/health](http://localhost:3001/health)
+* **Mastra AI Service**: [http://localhost:3001/health](http://localhost:3001/health)
 
 
-## 🎯 Use Cases
+##  Use Cases
 
 * **Emergency Department**: Quick patient intake and updates
 * **Laboratory Results**: Clean presentation of ORU messages
@@ -138,18 +218,26 @@ curl -X POST http://localhost:8000/api/v1/samples/process-all
 * **Discharge Planning**: Efficient preparation of discharge summaries
 
 
-## 🔧 Development
+##  Development
 
 ### Project Structure
 
 ```
 hl7-parse/
+├── src/                     # React frontend source
+│   ├── components/         # UI components
+│   ├── features/           # Feature modules
+│   ├── routes/             # App routing
+│   └── lib/                # Utilities
 ├── fastapi-backend/         # FastAPI application
 │   ├── app/                # Application code
 │   ├── sample_files/       # 4 realistic HL7 samples
-│   ├── mock-mastra/        # Mock AI service
+│   └── Dockerfile
+├── mastra-service/          # AI conversion service
+│   ├── src/                # TypeScript source
 │   └── Dockerfile
 ├── docker-compose.yml
+├── package.json            # Frontend dependencies
 └── start.sh
 ```
 
@@ -162,16 +250,19 @@ hl7-parse/
 
 ### Features Implemented
 
-✅ HL7 v2 parsing and validation
-✅ Multi-format conversion (XML, JSON, PDF)
-✅ Dashboard for real-time edits
-✅ REST API with OpenAPI docs
-✅ Database storage with full schema
-✅ Metrics and monitoring support
+ Modern React frontend with shadcn/ui components  
+ HL7 v2 parsing and validation  
+ AI-powered multi-format conversion (XML, JSON, PDF)  
+Interactive dashboard for real-time edits  
+ REST API with OpenAPI documentation  
+ PostgreSQL database with full schema  
+ Docker containerization  
+ Authentication and user management  
+ Responsive design with dark/light themes
 
 ---
 
-## 🔒 Security
+##  Security
 
 * Input validation & sanitization
 * SQL injection prevention
@@ -181,7 +272,7 @@ hl7-parse/
 
 ---
 
-## 📈 Production Considerations
+##  Production Considerations
 
 * Replace mock AI with real agents
 * Add authentication/authorization
@@ -191,7 +282,7 @@ hl7-parse/
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 * Extend HL7 models in `app/models/`
 * Add API endpoints in `app/routers/`
@@ -200,12 +291,12 @@ hl7-parse/
 
 ---
 
-## 📄 License
+##  License
 
 MIT License – free to use and improve for better healthcare workflows.
 
 ---
 
-**Built for Better Healthcare Interoperability** 🏥✨
+**Built for Better Healthcare Interoperability** 
 
-HL7 LiteBoard bridges the technical gap between healthcare systems and the clinicians who use them.
+Prism bridges the technical gap between healthcare systems and the clinicians who use them.
