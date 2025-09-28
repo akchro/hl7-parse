@@ -27,6 +27,7 @@ import { TopNav } from '@/components/layout/top-nav'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
+import { Triage } from '@/components/triage'
 
 // Mock data for dashboard
 const dashboardStats = {
@@ -172,8 +173,9 @@ export default function HL7Dashboard() {
           {/* Main Content Tabs */}
           <motion.div variants={itemVariants}>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-              <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:grid-cols-4">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="triage">Triage</TabsTrigger>
                 <TabsTrigger value="activity">Recent Activity</TabsTrigger>
                 <TabsTrigger value="analytics">Analytics</TabsTrigger>
               </TabsList>
@@ -256,6 +258,16 @@ export default function HL7Dashboard() {
                         </div>
                       </CardContent>
                     </Card>
+                  </motion.div>
+                </TabsContent>
+
+                <TabsContent value="triage" key="triage">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                  >
+                    <Triage />
                   </motion.div>
                 </TabsContent>
 

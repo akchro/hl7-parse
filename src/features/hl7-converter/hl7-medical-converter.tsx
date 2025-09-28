@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -47,6 +47,7 @@ export default function HL7MedicalConverter() {
   });
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState('json');
 
   const handleConvert = async () => {
@@ -215,7 +216,6 @@ export default function HL7MedicalConverter() {
 
   const viewPdf = () => {
     if (result?.medicalDocument?.pdfBase64) {
-      // Try to open PDF in a new tab first, fallback to modal if needed
       try {
         const byteCharacters = atob(result.medicalDocument.pdfBase64);
         const byteNumbers = new Array(byteCharacters.length);
@@ -226,19 +226,22 @@ export default function HL7MedicalConverter() {
         const blob = new Blob([byteArray], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         
-        // Open in new tab
+        // Try to open in new tab - this will use Chrome's default PDF viewer
         const newWindow = window.open(url, '_blank');
         if (newWindow) {
-          // Clean up URL after a delay
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          // Clean up URL after the tab has loaded
+          newWindow.onload = () => {
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          };
         } else {
-          // Fallback to modal if popup blocked
+          // Fallback to modal if popup blocked, but also use blob URL
+          setPdfBlobUrl(url);
           setPdfDialogOpen(true);
-          URL.revokeObjectURL(url);
+          // Don't revoke URL yet as modal needs it
         }
       } catch (error) {
         console.error('Error opening PDF:', error);
-        setPdfDialogOpen(true);
+        setError('Failed to open PDF. Please try downloading instead.');
       }
     }
   };
@@ -256,6 +259,22 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
     setResult(null);
     setError(null);
   };
+
+  // Cleanup blob URL when component unmounts or dialog closes
+  useEffect(() => {
+    return () => {
+      if (pdfBlobUrl) {
+        URL.revokeObjectURL(pdfBlobUrl);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pdfDialogOpen && pdfBlobUrl) {
+      URL.revokeObjectURL(pdfBlobUrl);
+      setPdfBlobUrl('');
+    }
+  }, [pdfDialogOpen, pdfBlobUrl]);
 
   return (
     <div className="container mx-auto p-6 max-w-7xl">
@@ -483,10 +502,18 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                       {result.medicalDocument.html && (
                         <div className="space-y-2">
                           <h3 className="text-lg font-semibold">Document Preview</h3>
-                          <div 
-                            className="bg-white p-4 rounded-md border overflow-auto max-h-[400px]"
-                            dangerouslySetInnerHTML={{ __html: result.medicalDocument.html }}
-                          />
+                          <div className="bg-white border rounded-lg overflow-hidden">
+                            <iframe
+                              srcDoc={result.medicalDocument.html}
+                              className="w-full h-96 border-0"
+                              title="Medical Document Preview"
+                              sandbox="allow-same-origin"
+                              style={{
+                                backgroundColor: 'white',
+                                colorScheme: 'normal'
+                              }}
+                            />
+                          </div>
                         </div>
                       )}
                       <div className="mt-4 p-4 bg-muted rounded-md">
@@ -553,9 +580,9 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
           <DialogHeader>
             <DialogTitle>Medical Document Preview</DialogTitle>
           </DialogHeader>
-          {result?.medicalDocument?.pdfBase64 && (
+          {pdfBlobUrl && (
             <iframe
-              src={`data:application/pdf;base64,${result.medicalDocument.pdfBase64}`}
+              src={pdfBlobUrl}
               className="w-full h-full"
               title="PDF Preview"
             />

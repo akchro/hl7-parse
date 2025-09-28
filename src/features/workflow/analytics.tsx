@@ -189,7 +189,7 @@ export function Analytics() {
     let patientId = 'Unknown ID';
 
     for (const line of lines) {
-      if (line.startsWith('PID')) {
+      if (line.trim().startsWith('PID')) {
         const segments = line.split('|');
         if (segments.length >= 6) {
           const nameSegment = segments[5];
@@ -198,7 +198,8 @@ export function Analytics() {
           if (nameSegment && nameSegment !== '') {
             const nameParts = nameSegment.split('^');
             if (nameParts.length >= 2) {
-              patientName = `${nameParts[0]} ${nameParts[1]}`.trim();
+              // Format: LAST^FIRST^MIDDLE, so display as FIRST LAST
+              patientName = `${nameParts[1]} ${nameParts[0]}`.trim();
             }
           }
           
