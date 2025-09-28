@@ -11,6 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Loader2, Save, Download, ArrowLeft, CheckCircle, AlertCircle, Edit, X, User, Calendar, FileText } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Header } from '@/components/layout/header'
+import { TopNav } from '@/components/layout/top-nav'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 interface SavedConversion {
   id: string;
@@ -287,6 +292,17 @@ export function Analytics() {
   }
 
   return (
+    <>
+    {/* ===== Top Heading ===== */}
+          <Header>
+            <TopNav links={topNav} />
+            <div className='ml-auto flex items-center space-x-4'>
+              <Search />
+              <ThemeSwitch />
+              <ProfileDropdown />
+            </div>
+          </Header>
+    
     <div className="container mx-auto p-6 space-y-6">
       {/* Header */}
       <motion.div
@@ -681,5 +697,39 @@ export function Analytics() {
         </div>
       </div>
     </div>
+    </>
   );
 }
+
+const topNav = [
+  {
+    title: 'Dashboard',
+    href: '/dash',
+    isActive: true,
+    disabled: false,
+  },
+  {
+    title: 'Conversions',
+    href: '/hl7-converter',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Patient Data',
+    href: '/workflow/analytics',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'HL7 Library',
+    href: '/workflow',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Analytics',
+    href: '/workflow/pdf',
+    isActive: false,
+    disabled: false,
+  },
+]

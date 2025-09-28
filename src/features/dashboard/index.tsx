@@ -152,31 +152,31 @@ export default function HL7Dashboard() {
 const topNav = [
   {
     title: 'Dashboard',
-    href: '/dashboard',
+    href: '/dash',
     isActive: true,
     disabled: false,
   },
   {
     title: 'Conversions',
-    href: '/conversions',
+    href: '/hl7-converter',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Patient Data',
-    href: '/patients',
+    href: '/workflow/analytics',
     isActive: false,
     disabled: false,
   },
   {
     title: 'HL7 Library',
-    href: '/library',
+    href: '/workflow',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Analytics',
-    href: '/analytics',
+    href: '/workflow/pdf',
     isActive: false,
     disabled: false,
   },

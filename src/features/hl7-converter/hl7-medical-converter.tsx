@@ -613,31 +613,31 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
 const topNav = [
   {
     title: 'Dashboard',
-    href: '/dashboard',
+    href: '/dash',
     isActive: true,
     disabled: false,
   },
   {
     title: 'Conversions',
-    href: '/conversions',
+    href: '/hl7-converter',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Patient Data',
-    href: '/patients',
+    href: '/workflow/analytics',
     isActive: false,
     disabled: false,
   },
   {
     title: 'HL7 Library',
-    href: '/library',
+    href: '/workflow',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Analytics',
-    href: '/analytics',
+    href: '/workflow/pdf',
     isActive: false,
     disabled: false,
   },
