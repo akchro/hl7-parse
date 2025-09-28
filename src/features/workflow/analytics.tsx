@@ -370,19 +370,19 @@ export function Analytics() {
         </Alert>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-6 items-start">
         {/* Conversions List Sidebar */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>Saved Conversions</CardTitle>
-              <CardDescription>
+        <div className="w-full">
+          <Card className="w-full">
+            <CardHeader className="p-4">
+              <CardTitle className="text-sm">Saved Conversions</CardTitle>
+              <CardDescription className="text-xs">
                 {conversions.length} conversion{conversions.length !== 1 ? 's' : ''}
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <ScrollArea className="h-[600px]">
-                <div className="space-y-2">
+            <CardContent className="p-0">
+              <ScrollArea className="h-[600px] w-full">
+                <div className="space-y-1 px-2 py-2">
                   {conversions.map((conversion) => {
                     const { patientName } = getPatientInfoFromHL7(conversion.original_hl7_content);
                     const isSelected = selectedConversion?.id === conversion.id;
@@ -390,38 +390,39 @@ export function Analytics() {
                     return (
                       <motion.div
                         key={conversion.id}
-                        whileHover={{ scale: 1.01 }}
-                        whileTap={{ scale: 0.99 }}
+                        whileHover={{ scale: 1.005 }}
+                        whileTap={{ scale: 0.995 }}
+                        className="origin-center"
                       >
-                        <Card 
-                          className={`cursor-pointer transition-colors ${
+                        <Card
+                          className={`cursor-pointer transition-colors w-full overflow-hidden ${
                             isSelected ? 'bg-muted border-primary' : 'hover:bg-muted/50'
                           }`}
                           onClick={() => handleConversionSelect(conversion)}
                         >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-3">
-                              <User className="h-4 w-4 text-muted-foreground" />
+                          <CardContent className="px-3 py-2">
+                            <div className="flex items-start gap-2 w-full">
+                              <User className="h-3 w-3 text-muted-foreground mt-0.5 shrink-0" />
                               <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">
+                                <p className="font-medium truncate text-sm">
                                   {patientName}
                                 </p>
-                                <p className="text-sm text-muted-foreground truncate">
+                                <p className="text-[11px] text-muted-foreground truncate">
                                   {conversion.title || 'Untitled Conversion'}
                                 </p>
                                 <div className="flex items-center gap-1 mt-1">
-                                  <Calendar className="h-3 w-3" />
-                                  <span className="text-xs text-muted-foreground">
+                                  <Calendar className="h-3 w-3 shrink-0" />
+                                  <span className="text-[10px] text-muted-foreground">
                                     {new Date(conversion.created_at).toLocaleDateString()}
                                   </span>
                                 </div>
                               </div>
-                              <div className="flex gap-1">
+                              <div className="flex gap-1 shrink-0">
                                 {conversion.json_content && (
-                                  <Badge variant="secondary" className="text-xs">J</Badge>
+                                  <Badge variant="secondary" className="text-[10px] px-1 py-0 leading-tight">J</Badge>
                                 )}
                                 {conversion.xml_content && (
-                                  <Badge variant="secondary" className="text-xs">X</Badge>
+                                  <Badge variant="secondary" className="text-[10px] px-1 py-0 leading-tight">X</Badge>
                                 )}
                               </div>
                             </div>
@@ -437,7 +438,7 @@ export function Analytics() {
         </div>
 
         {/* Conversion Details */}
-        <div className="lg:col-span-3">
+        <div className="min-w-0">
           {selectedConversion ? (
             <Card>
               <CardHeader>
