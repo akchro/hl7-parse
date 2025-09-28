@@ -13,6 +13,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Header } from '@/components/layout/header'
+import LiquidGlass from 'liquid-glass-react'
 
 interface MedicalDocumentResult {
   plainEnglish?: string;
@@ -291,7 +292,9 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                 <ProfileDropdown />
               </div>
             </Header>
-    <div className="container mx-auto p-6 max-w-7xl">
+    <LiquidGlass cornerRadius={20} elasticity={0} displacementScale={25} blurAmount={0}
+                 style={{position:'relative', top:340, left:640}}
+      className="">
       {/* ===== Top Heading ===== */}
             
       <div className="mb-8">
@@ -303,8 +306,8 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Input Section */}
-        <Card>
-          <CardHeader>
+        <Card className={'bg-0'}>
+          <CardHeader className={'bg-white-5'}>
             <CardTitle>HL7 Input</CardTitle>
             <CardDescription>
               Paste your HL7 message below and click process to convert, generate PDF, and save
@@ -315,7 +318,7 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
               placeholder="Paste your HL7 message here..."
               value={hl7Input}
               onChange={(e) => setHl7Input(e.target.value)}
-              className="min-h-[350px] font-mono text-sm"
+              className="min-h-[350px] font-mono text-sm bg-white-50"
             />
             <div className="flex gap-2 flex-wrap">
               <Button
@@ -351,7 +354,7 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
         </Card>
 
         {/* Results Section with Tabs */}
-        <Card>
+        <Card className={'bg-0'}>
           <CardHeader>
             <CardTitle>Conversion Results</CardTitle>
           </CardHeader>
@@ -605,7 +608,7 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
           )}
         </DialogContent>
       </Dialog>
-    </div>
+    </LiquidGlass>
     </>
   );
 }

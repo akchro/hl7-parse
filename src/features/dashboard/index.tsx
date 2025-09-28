@@ -51,23 +51,10 @@ export default function HL7Dashboard() {
 
       {/* ===== Main Content ===== */}
       <Main>
-        <div className="absolute inset-0 -z-30">
-          <video
-            src="bg3.mp4"
-            autoPlay
-            loop
-            playsInline
-            muted
-            className="h-screen w-screen object-cover"
-          />
-          <div className="
-    pointer-events-none absolute inset-0
-    bg-[radial-gradient(ellipse_at_center,transparent_62%,white_100%)]
-  " />
-        </div>
+
         <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
           {/* Header Section */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
@@ -80,7 +67,7 @@ export default function HL7Dashboard() {
           </motion.div>
 
           {/* Main Action Buttons */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
