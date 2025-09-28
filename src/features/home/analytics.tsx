@@ -117,7 +117,7 @@ export default function HL7Dashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Conversions</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
+                <FileText className="h-4 w-4 text-black dark:text-white" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{dashboardStats.totalConversions}</div>
@@ -130,7 +130,7 @@ export default function HL7Dashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                <CheckCircle className="h-4 w-4 text-black dark:text-white" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{dashboardStats.successRate}%</div>
@@ -143,7 +143,7 @@ export default function HL7Dashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Patients Processed</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <Users className="h-4 w-4 text-black dark:text-white" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{dashboardStats.patientsProcessed}</div>
@@ -156,7 +156,7 @@ export default function HL7Dashboard() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Data Fields</CardTitle>
-                <Database className="h-4 w-4 text-muted-foreground" />
+                <Database className="h-4 w-4 text-black dark:text-white" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
@@ -196,7 +196,7 @@ export default function HL7Dashboard() {
                       </CardHeader>
                       <CardContent className="grid gap-4">
                         <Button variant="outline" className="justify-start gap-3 h-16">
-                          <FileCode className="h-5 w-5" />
+                          <FileCode className="h-5 w-5 text-black dark:text-white" />
                           <div className="text-left">
                             <div className="font-medium">ADT to JSON</div>
                             <div className="text-sm text-muted-foreground">
@@ -206,7 +206,7 @@ export default function HL7Dashboard() {
                         </Button>
                         
                         <Button variant="outline" className="justify-start gap-3 h-16">
-                          <FileOutput className="h-5 w-5" />
+                          <FileOutput className="h-5 w-5 text-black dark:text-white" />
                           <div className="text-left">
                             <div className="font-medium">ORU to PDF</div>
                             <div className="text-sm text-muted-foreground">
@@ -216,7 +216,7 @@ export default function HL7Dashboard() {
                         </Button>
                         
                         <Button variant="outline" className="justify-start gap-3 h-16">
-                          <Database className="h-5 w-5" />
+                          <Database className="h-5 w-5 text-black dark:text-white" />
                           <div className="text-left">
                             <div className="font-medium">Batch Process</div>
                             <div className="text-sm text-muted-foreground">
@@ -285,7 +285,7 @@ export default function HL7Dashboard() {
                                 <div className={`p-2 rounded-full ${
                                   activity.status === 'success' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'
                                 }`}>
-                                  <Zap className="h-4 w-4" />
+                                  <Zap className="h-4 w-4 text-black dark:text-white" />
                                 </div>
                                 <div>
                                   <div className="font-medium">{activity.type}</div>
@@ -352,21 +352,21 @@ export default function HL7Dashboard() {
                       <CardContent className="space-y-4">
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <FileCode className="h-4 w-4 text-blue-600" />
+                            <FileCode className="h-4 w-4 text-black dark:text-white" />
                             <span className="text-sm font-medium">JSON</span>
                           </div>
                           <Badge>68%</Badge>
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <FileOutput className="h-4 w-4 text-green-600" />
+                            <FileOutput className="h-4 w-4 text-black dark:text-white" />
                             <span className="text-sm font-medium">PDF</span>
                           </div>
                           <Badge variant="secondary">45%</Badge>
                         </div>
                         <div className="flex justify-between items-center">
                           <div className="flex items-center gap-2">
-                            <Database className="h-4 w-4 text-purple-600" />
+                            <Database className="h-4 w-4 text-black dark:text-white" />
                             <span className="text-sm font-medium">XML</span>
                           </div>
                           <Badge variant="outline">32%</Badge>

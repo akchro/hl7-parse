@@ -176,7 +176,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
               placeholder="Paste your HL7 message here..."
               value={hl7Input}
               onChange={(e) => setHl7Input(e.target.value)}
-              className="min-h-[300px] font-mono text-sm"
+              className="min-h-[300px] font-mono text-sm placeholder:text-white"
             />
             <div className="flex gap-2">
               <Button
@@ -251,7 +251,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   </Alert>
                 )
               ) : (
-                <div className="text-muted-foreground text-center py-8">
+                <div className="text-white text-center py-8">
                   JSON output will appear here after conversion
                 </div>
               )}
@@ -300,7 +300,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   </Alert>
                 )
               ) : (
-                <div className="text-muted-foreground text-center py-8">
+                <div className="text-white text-center py-8">
                   XML output will appear here after conversion
                 </div>
               )}
