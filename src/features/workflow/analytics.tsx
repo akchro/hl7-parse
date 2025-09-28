@@ -408,9 +408,9 @@ export function Analytics() {
           </Alert>
         )}
 
-        <div className='grid grid-cols-1 items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)]'>
+        <div className='grid grid-cols-1 items-start gap-6 lg:grid-cols-[380px_minmax(0,1fr)]'>
           {/* Conversions List Sidebar */}
-          <div className='w-full flex-shrink-0 lg:w-[260px]'>
+          <div className='w-full flex-shrink-0 lg:w-[380px]'>
             <Card className='w-full'>
               <CardHeader className='p-4'>
                 <CardTitle className='text-sm'>Saved Conversions</CardTitle>
