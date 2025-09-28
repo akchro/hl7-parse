@@ -37,14 +37,15 @@ async def save_conversion(
             raise HTTPException(status_code=400, detail="HL7 content is required")
         
         # Validate that we have at least one converted format
-        if not request.json_content and not request.xml_content:
-            raise HTTPException(status_code=400, detail="At least one converted format (JSON or XML) is required")
+        if not request.json_content and not request.xml_content and not request.pdf_base64:
+            raise HTTPException(status_code=400, detail="At least one converted format (JSON, XML, or PDF) is required")
         
         # Create new SavedConversion record
         saved_conversion = SavedConversion(
             original_hl7_content=request.hl7_content,
             json_content=request.json_content,
             xml_content=request.xml_content,
+            pdf_base64=request.pdf_base64,
             conversion_metadata=request.conversion_metadata,
             title=request.title,
             description=request.description,
@@ -129,6 +130,7 @@ async def list_saved_conversions(
                 original_hl7_content=conv.original_hl7_content,
                 json_content=conv.json_content,
                 xml_content=conv.xml_content,
+                pdf_base64=conv.pdf_base64,
                 conversion_metadata=conv.conversion_metadata,
                 user_id=conv.user_id,
                 created_at=conv.created_at,
@@ -178,6 +180,7 @@ async def get_saved_conversion(
             original_hl7_content=conversion.original_hl7_content,
             json_content=conversion.json_content,
             xml_content=conversion.xml_content,
+            pdf_base64=conversion.pdf_base64,
             conversion_metadata=conversion.conversion_metadata,
             user_id=conversion.user_id,
             created_at=conversion.created_at,

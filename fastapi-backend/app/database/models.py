@@ -97,6 +97,7 @@ class SavedConversion(Base):
     # Converted formats
     json_content = Column(JSONB)
     xml_content = Column(Text)
+    pdf_base64 = Column(Text)  # Store PDF as base64 string
     
     # Metadata
     conversion_metadata = Column(JSONB)  # Store metadata from both conversions

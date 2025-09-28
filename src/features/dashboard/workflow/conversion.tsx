@@ -129,7 +129,7 @@ const apiService = {
         hl7_content: results.hl7_content,
         json_content: results.json_output ? JSON.parse(results.json_output) : null,
         xml_content: results.xml_output,
-        pdf_base64: null, // Can be added if PDF generation is implemented
+        pdf_base64: results.pdf_base64 || null, // Include PDF base64 data if available
         title: `HL7 Conversion - ${new Date().toLocaleString()}`,
         description: 'Converted using HL7 Converter'
       }),
@@ -268,12 +268,47 @@ export default function HL7ConversionPage() {
         return
       }
 
-      // Perform conversion
-      const result = await apiService.convertHL7(hl7Input, messageType)
-      setJsonOutput(JSON.stringify(result.json, null, 2))
-      setXmlOutput(result.xml)
-      setStage('results')
-      setSuccess("Conversion completed successfully!")
+      // Step 1: Perform HL7 to JSON/XML conversion
+      const conversionResult = await apiService.convertHL7(hl7Input, messageType)
+      const jsonOutputStr = JSON.stringify(conversionResult.json, null, 2)
+      setJsonOutput(jsonOutputStr)
+      setXmlOutput(conversionResult.xml)
+
+      // Step 2: Generate PDF
+      let pdfBase64Data = ""
+      try {
+        const pdfResult = await apiService.generatePdf(hl7Input)
+        pdfBase64Data = pdfResult.pdfBase64
+        setPdfBase64(pdfBase64Data)
+      } catch (pdfError) {
+        console.warn('PDF generation failed, continuing without PDF:', pdfError)
+        // Continue with the process even if PDF generation fails
+      }
+
+      // Step 3: Save to database
+      try {
+        const saveResult = await apiService.saveResults({
+          hl7_content: hl7Input,
+          message_type: messageType,
+          json_output: jsonOutputStr,
+          xml_output: conversionResult.xml,
+          pdf_base64: pdfBase64Data || null,
+          converted_at: new Date().toISOString(),
+        })
+
+        if (saveResult.success) {
+          setStage('results')
+          setSuccess("HL7 converted, PDF generated, and results saved to database successfully!")
+        } else {
+          setStage('results')
+          setSuccess("HL7 converted and PDF generated successfully! Database save failed - you can try saving manually.")
+        }
+      } catch (saveError) {
+        console.warn('Database save failed, but conversion and PDF generation succeeded:', saveError)
+        setStage('results')
+        setSuccess("HL7 converted and PDF generated successfully! Database save failed - you can try saving manually.")
+      }
+
     } catch (error) {
       console.error('Conversion failed:', error)
       setError(error instanceof Error ? error.message : 'Conversion failed. Please check your HL7 format and try again.')
@@ -353,6 +388,7 @@ export default function HL7ConversionPage() {
         message_type: messageType,
         json_output: jsonOutput,
         xml_output: xmlOutput,
+        pdf_base64: pdfBase64, // Include PDF base64 data
         converted_at: new Date().toISOString(),
       })
 
@@ -439,9 +475,9 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
               variants={fadeIn}
               className="text-center mb-8"
             >
-              <h1 className="text-3xl font-bold mb-4">HL7 Message Converter</h1>
+              <h1 className="text-3xl font-bold mb-4">HL7 Message Processor</h1>
               <p className="text-muted-foreground max-w-2xl mx-auto">
-                Convert HL7 v2 messages to structured JSON and XML formats with PDF generation
+                Convert HL7 v2 messages to JSON/XML, generate PDF documents, and save to database in one step
               </p>
             </motion.div>
 
@@ -604,10 +640,10 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Zap className="h-5 w-5" />
-                      Conversion Settings
+                      Processing Options
                     </CardTitle>
                     <CardDescription>
-                      Configure how your HL7 message will be processed
+                      Your HL7 message will be converted, PDF generated, and saved to database
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -646,7 +682,7 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                         </div>
                       </div>
 
-                      {/* NEW: PDF Generation Option */}
+                      {/* PDF Generation Option */}
                       <div className="flex items-center gap-3 p-2 rounded-lg bg-purple-50 dark:bg-purple-950/20">
                         <FileText className="h-4 w-4 text-purple-600" />
                         <div>
@@ -656,27 +692,18 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                           </p>
                         </div>
                       </div>
-                    </div>
 
-                    {/* NEW: PDF Generation Button */}
-                    <Button
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={handleGeneratePdf}
-                      disabled={!hl7Input.trim() || isGeneratingPdf}
-                    >
-                      {isGeneratingPdf ? (
-                        <>
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
-                          Generating PDF...
-                        </>
-                      ) : (
-                        <>
-                          <FileText className="h-4 w-4" />
-                          Generate Medical PDF
-                        </>
-                      )}
-                    </Button>
+                      {/* Database Storage Option */}
+                      <div className="flex items-center gap-3 p-2 rounded-lg bg-orange-50 dark:bg-orange-950/20">
+                        <Database className="h-4 w-4 text-orange-600" />
+                        <div>
+                          <p className="text-sm font-medium">Database Storage</p>
+                          <p className="text-xs text-muted-foreground">
+                            Save results to database
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -689,12 +716,12 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
                   {isLoading ? (
                     <>
                       <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current"></div>
-                      Converting...
+                      Processing...
                     </>
                   ) : (
                     <>
                       <Zap className="h-5 w-5" />
-                      Convert HL7 Message
+                      Convert, Generate PDF & Save
                     </>
                   )}
                 </Button>
@@ -741,9 +768,9 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
             <div className="animate-pulse mb-6">
               <Zap className="h-16 w-16 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Converting HL7 Message</h3>
+            <h3 className="text-xl font-semibold mb-2">Processing HL7 Message</h3>
             <p className="text-muted-foreground text-center mb-6">
-              Parsing segments and generating structured outputs...
+              Converting to JSON/XML, generating PDF, and saving to database...
             </p>
             <div className="w-64 h-2 bg-muted rounded-full overflow-hidden">
               <div 
@@ -769,9 +796,9 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
               <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="h-8 w-8 text-primary" />
               </div>
-              <h2 className="text-3xl font-bold mb-2">Conversion Successful!</h2>
+              <h2 className="text-3xl font-bold mb-2">Processing Complete!</h2>
               <p className="text-muted-foreground">
-                Your HL7 message has been converted to JSON and XML formats
+                Your HL7 message has been converted, PDF generated, and results saved to database
               </p>
             </div>
 
@@ -902,21 +929,11 @@ PV1|1|I|ICU^101^01||||^DOCTOR^ATTENDING^^^MD||||||||||V123456789||||||||||||||||
             {/* Action Buttons */}
             <Card>
               <CardContent className="p-6">
-                <div className="flex gap-3 flex-col sm:flex-row">
+                <div className="flex gap-3 flex-col sm:flex-row justify-center">
                   <Button variant="outline" onClick={resetForm} className="gap-2">
                     <FileText className="h-4 w-4" />
-                    Convert Another
+                    Process Another Message
                   </Button>
-                  <Button onClick={handleSaveResults} className="gap-2">
-                    <Database className="h-4 w-4" />
-                    Save to Database
-                  </Button>
-                  {!pdfBase64 && (
-                    <Button variant="outline" onClick={handleGeneratePdf} className="gap-2">
-                      <FileText className="h-4 w-4" />
-                      Generate PDF
-                    </Button>
-                  )}
                 </div>
               </CardContent>
             </Card>
