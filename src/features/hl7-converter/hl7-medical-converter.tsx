@@ -8,6 +8,11 @@ import { Loader2, Copy, CheckCircle, AlertCircle, Save, FileText, Download, Eye 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { TopNav } from '@/components/layout/top-nav'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { Search } from '@/components/search'
+import { ThemeSwitch } from '@/components/theme-switch'
+import { Header } from '@/components/layout/header'
 
 interface MedicalDocumentResult {
   plainEnglish?: string;
@@ -301,8 +306,20 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
   };
 
   return (
+    <>
+    <Header>
+              <TopNav links={topNav} />
+              <div className='ml-auto flex items-center space-x-4'>
+                <Search />
+                <ThemeSwitch />
+                <ProfileDropdown />
+              </div>
+            </Header>
     <div className="container mx-auto p-6 max-w-7xl">
+      {/* ===== Top Heading ===== */}
+            
       <div className="mb-8">
+        
         <h1 className="text-3xl font-bold mb-2">HL7 Medical Document Converter</h1>
         <p className="text-muted-foreground">
           Convert HL7 messages to readable medical documents with PDF generation
@@ -643,5 +660,39 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
+
+const topNav = [
+  {
+    title: 'Dashboard',
+    href: '/dashboard',
+    isActive: true,
+    disabled: false,
+  },
+  {
+    title: 'Conversions',
+    href: '/conversions',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Patient Data',
+    href: '/patients',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'HL7 Library',
+    href: '/library',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Analytics',
+    href: '/analytics',
+    isActive: false,
+    disabled: false,
+  },
+]
