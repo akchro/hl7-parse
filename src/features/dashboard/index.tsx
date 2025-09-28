@@ -24,6 +24,7 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { Triage } from '@/components/triage'
+import LiquidGlass from 'liquid-glass-react'
 
 export default function HL7Dashboard() {
   const [triageOpen, setTriageOpen] = useState(false)
@@ -50,6 +51,20 @@ export default function HL7Dashboard() {
 
       {/* ===== Main Content ===== */}
       <Main>
+        <div className="absolute inset-0 -z-30">
+          <video
+            src="bg2.mp4"
+            autoPlay
+            loop
+            playsInline
+            muted
+            className="h-screen w-screen object-cover"
+          />
+          <div className="
+    pointer-events-none absolute inset-0
+    bg-[radial-gradient(ellipse_at_center,transparent_62%,white_100%)]
+  " />
+        </div>
         <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
           {/* Header Section */}
           <motion.div 
@@ -72,7 +87,9 @@ export default function HL7Dashboard() {
             className="flex flex-col lg:flex-row gap-6 w-full max-w-2xl"
           >
             {/* Conversion Button */}
-            <Card className="flex-1 hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group" onClick={handleNewConversion}>
+            <LiquidGlass className="flex-1 cursor-pointer" onClick={handleNewConversion} cornerRadius={30} elasticity={0.05} displacementScale={25} blurAmount={0}
+                         style={{position: 'relative', top:200, left:80}}
+            >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-blue-100 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
                   <FileCode className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -92,10 +109,12 @@ export default function HL7Dashboard() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>
-            </Card>
+            </LiquidGlass>
 
             {/* Triage Button */}
-            <Card className="flex-1 hover:shadow-lg transition-all duration-300 hover:scale-105 cursor-pointer group" onClick={handleTriage}>
+            <LiquidGlass className="flex-1 cursor-pointer group" onClick={handleTriage} cornerRadius={30} elasticity={0.05} displacementScale={25} blurAmount={0}
+                         style={{position:"relative", top:200, right:80}}
+            >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
                   <Stethoscope className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -106,17 +125,16 @@ export default function HL7Dashboard() {
                     Analyze patient data and prioritize cases using intelligent triage algorithms
                   </p>
                 </div>
-                <Button 
-                  onClick={handleTriage} 
-                  variant="outline" 
-                  className="w-full gap-2 border-green-200 hover:bg-green-50 hover:border-green-300 dark:border-green-800 dark:hover:bg-green-900/20 transition-colors"
+                <Button
+                  onClick={handleTriage}
+                  className="w-full gap-2 group-hover:bg-green-600 transition-colors"
                   size="lg"
                 >
                   Access Triage
-                  <Users className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </CardContent>
-            </Card>
+            </LiquidGlass>
           </motion.div>
 
           {/* Quick Info */}
