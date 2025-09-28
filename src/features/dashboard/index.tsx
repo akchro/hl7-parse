@@ -53,7 +53,7 @@ export default function HL7Dashboard() {
       <Main>
         <div className="absolute inset-0 -z-30">
           <video
-            src="bg2.mp4"
+            src="bg3.mp4"
             autoPlay
             loop
             playsInline
