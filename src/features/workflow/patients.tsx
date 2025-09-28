@@ -9,6 +9,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Search, Download, FileText, User, Calendar, Loader2, Copy, CheckCircle } from 'lucide-react';
 import { format } from 'date-fns';
+import { Header } from '@/components/layout/header'
+import { TopNav } from '@/components/layout/top-nav'
+import { ProfileDropdown } from '@/components/profile-dropdown'
+import { ThemeSwitch } from '@/components/theme-switch'
 
 interface SavedConversion {
   id: string;
@@ -164,6 +168,16 @@ export function Patients() {
   }
 
   return (
+    <>
+    {/* ===== Top Heading ===== */}
+              <Header>
+                <TopNav links={topNav} />
+                <div className='ml-auto flex items-center space-x-4'>
+                  <Search />
+                  <ThemeSwitch />
+                  <ProfileDropdown />
+                </div>
+              </Header>
     <div className="container mx-auto py-6 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -484,5 +498,39 @@ export function Patients() {
         </DialogContent>
       </Dialog>
     </div>
+    </>
   );
 }
+
+const topNav = [
+  {
+    title: 'Dashboard',
+    href: '/dash',
+    isActive: true,
+    disabled: false,
+  },
+  {
+    title: 'Conversions',
+    href: '/hl7-converter',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Patient Data',
+    href: '/workflow/analytics',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'HL7 Library',
+    href: '/workflow',
+    isActive: false,
+    disabled: false,
+  },
+  {
+    title: 'Analytics',
+    href: '/workflow/pdf',
+    isActive: false,
+    disabled: false,
+  },
+]

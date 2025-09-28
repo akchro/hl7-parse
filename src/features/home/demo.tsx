@@ -75,7 +75,7 @@ export default function DemoPage() {
               Live Demo
             </div>
             <h1 className='mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl'>
-              See HL7 LiteBoard <span className='text-primary'>in Action</span>
+              See Prism <span className='text-primary'>in Action</span>
             </h1>
             <p className='text-muted-foreground mb-8 text-xl'>
               Watch how we transform complex healthcare data into intuitive,
@@ -97,7 +97,7 @@ export default function DemoPage() {
             <Card className='bg-background border-0'>
               <CardHeader className='pb-8 text-center'>
                 <CardTitle className='text-2xl md:text-3xl'>
-                  HL7 LiteBoard Platform Demo
+                  Prism Platform Demo
                 </CardTitle>
                 <CardDescription className='text-lg'>
                   A comprehensive walkthrough of our solution
@@ -124,7 +124,7 @@ export default function DemoPage() {
                       width="100%"
                       height="100%"
                       src={`https://www.youtube.com/embed/${youtubeVideoId}`}
-                      title="HL7 LiteBoard Demo"
+                      title="Prism Demo"
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -138,7 +138,7 @@ export default function DemoPage() {
                   <div className='flex flex-col items-center justify-between gap-4 sm:flex-row'>
                     <div>
                       <h3 className='font-semibold'>
-                        HL7 LiteBoard Platform Overview
+                       Prism Platform Overview
                       </h3>
                       <p className='text-muted-foreground text-sm'>
                         Duration: 8:24 • Updated: November 2024

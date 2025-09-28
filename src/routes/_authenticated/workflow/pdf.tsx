@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import PDF from '@/features/dashboard/workflow/pdf'
+import HL7Dashboard from '@/features/home/analytics'
 
 export const Route = createFileRoute('/_authenticated/workflow/pdf')({
-  component: PDF,
+  component: HL7Dashboard,
 })

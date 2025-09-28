@@ -127,7 +127,7 @@ export default function Home() {
                 <div className="flex items-center justify-center w-10 h-10 bg-foreground rounded-lg">
                   <Heart className="w-6 h-6 text-background" />
                 </div>
-                <span className="text-lg font-semibold text-muted-foreground">HL7 LiteBoard</span>
+                <span className="text-lg font-semibold text-muted-foreground">Prism</span>
               </div>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
@@ -248,7 +248,7 @@ export default function Home() {
               Our Innovative Solution
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground text-xl max-w-3xl mx-auto">
-              HL7 LiteBoard acts as a translation and interaction layer between hospital systems 
+              Prism acts as a translation and interaction layer between hospital systems 
               and healthcare professionals, improving usability without requiring deep technical expertise.
             </motion.p>
           </div>
@@ -330,7 +330,7 @@ export default function Home() {
                 variants={fadeUp}
                 className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto"
               >
-                Join healthcare providers who are already reducing costs and improving efficiency with HL7 LiteBoard.
+                Join healthcare providers who are already reducing costs and improving efficiency with Prism.
               </motion.p>
               <motion.div 
                 variants={fadeUp}
@@ -362,7 +362,7 @@ export default function Home() {
               Executive Summary
             </motion.h2>
             <motion.p variants={fadeUp} className="text-lg text-muted-foreground mb-6">
-              HL7 LiteBoard is a lightweight, clinician-friendly solution that ingests HL7 data streams 
+              Prism is a lightweight, clinician-friendly solution that ingests HL7 data streams 
               and presents them in a digestible, editable, and exportable format. By translating complex 
               HL7 v2 messages into a clean, interactive dashboard, the platform allows healthcare professionals 
               to quickly review, update, and generate patient records in familiar formats (PDF, JSON, XML).

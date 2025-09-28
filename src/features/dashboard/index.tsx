@@ -73,7 +73,7 @@ export default function HL7Dashboard() {
             transition={{ duration: 0.6 }}
             className="text-center space-y-4"
           >
-            <h1 className="text-4xl font-bold tracking-tight">HL7 LiteBoard</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Prism</h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
               Streamline HL7 data processing for clinical workflows
             </p>
@@ -170,31 +170,31 @@ export default function HL7Dashboard() {
 const topNav = [
   {
     title: 'Dashboard',
-    href: '/dashboard',
+    href: '/dash',
     isActive: true,
     disabled: false,
   },
   {
     title: 'Conversions',
-    href: '/conversions',
+    href: '/hl7-converter',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Patient Data',
-    href: '/patients',
+    href: '/workflow/analytics',
     isActive: false,
     disabled: false,
   },
   {
     title: 'HL7 Library',
-    href: '/library',
+    href: '/workflow',
     isActive: false,
     disabled: false,
   },
   {
     title: 'Analytics',
-    href: '/analytics',
+    href: '/workflow/pdf',
     isActive: false,
     disabled: false,
   },

@@ -55,7 +55,7 @@ export function Footer() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center">
             <motion.h2 variants={fadeUp} className="text-2xl md:text-3xl font-bold mb-4">
-              Stay Updated with HL7 LiteBoard
+              Stay Updated with Prism
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground mb-8">
               Subscribe for healthcare interoperability updates, feature releases, and industry insights.
@@ -90,7 +90,7 @@ export function Footer() {
               <div className="flex items-center justify-center w-8 h-8 bg-foreground rounded-lg">
                 <Heart className="w-5 h-5 text-background" />
               </div>
-              <h3 className="text-lg font-semibold">HL7 LiteBoard</h3>
+              <h3 className="text-lg font-semibold">Prism</h3>
             </div>
             <p className="text-muted-foreground">
               A clinician-friendly solution that transforms complex HL7 data streams into 
@@ -179,7 +179,7 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-3">
                 <Mail className="h-4 w-4 text-foreground" />
-                <span className="text-muted-foreground">support@hl7liteboard.com</span>
+                <span className="text-muted-foreground">support@prism.com</span>
               </div>
               <div className="flex items-center gap-3">
                 <Clock className="h-4 w-4 text-foreground" />
@@ -201,7 +201,7 @@ export function Footer() {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-muted-foreground text-sm">
-              © {currentYear} HL7 LiteBoard. Making healthcare data accessible for clinicians.
+              © {currentYear} Prism. Making healthcare data accessible for clinicians.
             </p>
             <div className="flex flex-wrap gap-6 text-sm">
               {[
