@@ -292,7 +292,7 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                 <ProfileDropdown />
               </div>
             </Header>
-    <LiquidGlass cornerRadius={20} elasticity={0} displacementScale={25} blurAmount={0}
+    <LiquidGlass cornerRadius={20} elasticity={0} displacementScale={50} blurAmount={0.1}
                  style={{position:'relative', top:340, left:640}}
       className="">
       {/* ===== Top Heading ===== */}
