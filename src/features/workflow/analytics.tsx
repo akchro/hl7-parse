@@ -1,161 +1,243 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useSearch } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, FileText, Code, Edit, Loader2 } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Loader2, Save, Download, ArrowLeft, CheckCircle, AlertCircle, Edit, X, User, Calendar, FileText } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface AnalyticsSearch {
-  messageId: string;
-  patientName: string;
-  format: 'raw' | 'json' | 'xml';
+interface SavedConversion {
+  id: string;
+  title?: string;
+  description?: string;
+  original_hl7_content: string;
+  json_content?: Record<string, any>;
+  xml_content?: string;
+  conversion_metadata?: Record<string, any>;
+  user_id?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function Analytics() {
   const navigate = useNavigate();
-  const search = useSearch({ from: '/_authenticated/workflow/analytics' });
-  const { messageId, patientName, format: initialFormat } = search as AnalyticsSearch;
-  
-  const [message, setMessage] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeFormat, setActiveFormat] = useState<'raw' | 'json' | 'xml'>(initialFormat || 'raw');
-  const [editedContent, setEditedContent] = useState('');
+  const [conversions, setConversions] = useState<SavedConversion[]>([]);
+  const [selectedConversion, setSelectedConversion] = useState<SavedConversion | null>(null);
+  const [editedConversion, setEditedConversion] = useState<SavedConversion | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('overview');
 
+  // Fetch saved conversions
   useEffect(() => {
-    if (messageId) {
-      fetchMessageData();
-    }
-  }, [messageId]);
+    fetchConversions();
+  }, []);
 
-  const fetchMessageData = async () => {
+  const fetchConversions = async () => {
     try {
-      setLoading(true);
-      // Fetch message details and formats
-      const [messageDetail, rawFormat, jsonFormat, xmlFormat] = await Promise.all([
-        fetch(`/api/browse/messages/${messageId}`).then(r => r.ok ? r.json() : null),
-        fetch(`/api/formats/${messageId}/raw`).then(r => r.ok ? r.text() : null),
-        fetch(`/api/formats/${messageId}/json`).then(r => r.ok ? r.json() : null),
-        fetch(`/api/formats/${messageId}/xml`).then(r => r.ok ? r.text() : null),
-      ]);
-
-      setMessage({
-        ...messageDetail,
-        raw: rawFormat,
-        json: jsonFormat,
-        xml: xmlFormat
-      });
-
-      // Set initial content based on format
-      setEditedContent(getFormatContent(initialFormat, rawFormat, jsonFormat, xmlFormat));
-    } catch (error) {
-      console.error('Error fetching message data:', error);
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch('/api/v1/conversions/list');
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch conversions: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setConversions(data.conversions);
+      
+      // Select the first conversion by default
+      if (data.conversions.length > 0) {
+        setSelectedConversion(data.conversions[0]);
+        setEditedConversion(data.conversions[0]);
+      }
+      
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error fetching conversions:', err);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  const getFormatContent = (format: string, raw: string | null, json: any, xml: string | null): string => {
-  switch (format) {
-    case 'json':
-      return json ? JSON.stringify(json, null, 2) : 'No JSON content available';
-    case 'xml':
-      return xml || 'No XML content available';
-    case 'raw':
-    default:
-      return raw || 'No raw content available';
-  }
-};
-
-  const handleFormatChange = (format: 'raw' | 'json' | 'xml') => {
-    setActiveFormat(format);
-    if (message) {
-      setEditedContent(getFormatContent(format, message.raw, message.json, message.xml));
-    }
+  const handleConversionSelect = (conversion: SavedConversion) => {
+    setSelectedConversion(conversion);
+    setEditedConversion(conversion);
     setIsEditing(false);
-  };
-
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      
-      // Convert the edited content back to the appropriate format
-      let convertedContent = editedContent;
-      
-      if (activeFormat === 'json') {
-        // Validate JSON
-        const parsedJson = JSON.parse(editedContent);
-        // Use the conversion endpoint to convert JSON back to HL7
-        const response = await fetch('/api/mastra/convert/json', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ hl7_message: parsedJson })
-        });
-        
-        if (response.ok) {
-          const result = await response.json();
-          convertedContent = result.hl7_raw || editedContent;
-        }
-      }
-
-      // Save the updated message
-      const saveResponse = await fetch('/api/conversions/save', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message_id: messageId,
-          content: convertedContent,
-          format: activeFormat,
-          patient_name: patientName
-        })
-      });
-
-      if (saveResponse.ok) {
-        // Refresh the message data
-        await fetchMessageData();
-        setIsEditing(false);
-        
-        // Navigate back to patients
-        navigate({ to: '/workflow' });
-      }
-    } catch (error) {
-      console.error('Error saving message:', error);
-    } finally {
-      setSaving(false);
-    }
+    setActiveTab('overview');
   };
 
   const handleEditToggle = () => {
     if (isEditing) {
-      // Reset to original content when canceling edit
-      setEditedContent(getFormatContent(activeFormat, message.raw, message.json, message.xml));
+      // Cancel editing - reset to original values
+      setEditedConversion(selectedConversion);
     }
     setIsEditing(!isEditing);
   };
 
-  if (loading) {
+  const handleFieldChange = (field: keyof SavedConversion, value: any) => {
+    if (!editedConversion) return;
+    
+    setEditedConversion({
+      ...editedConversion,
+      [field]: value
+    });
+  };
+
+  const handleContentChange = (content: string, format: 'hl7' | 'json' | 'xml') => {
+    if (!editedConversion) return;
+    
+    setEditedConversion({
+      ...editedConversion,
+      ...(format === 'hl7' && { original_hl7_content: content }),
+      ...(format === 'json' && { json_content: content ? JSON.parse(content) : null }),
+      ...(format === 'xml' && { xml_content: content })
+    });
+  };
+
+  const handleSave = async () => {
+    if (!editedConversion) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/v1/conversions/${editedConversion.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: editedConversion.title,
+          description: editedConversion.description,
+          original_hl7_content: editedConversion.original_hl7_content,
+          json_content: editedConversion.json_content,
+          xml_content: editedConversion.xml_content,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update conversion');
+      }
+
+      const updatedConversion = await response.json();
+      
+      // Update local state
+      setConversions(conversions.map(conv => 
+        conv.id === editedConversion.id ? updatedConversion : conv
+      ));
+      setSelectedConversion(updatedConversion);
+      setEditedConversion(updatedConversion);
+      setIsEditing(false);
+      setSaveSuccess(true);
+      
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setError('Failed to save changes');
+      console.error('Error saving conversion:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDownload = (format: 'hl7' | 'json' | 'xml') => {
+    if (!selectedConversion) return;
+
+    let content = '';
+    let filename = `conversion-${selectedConversion.id}`;
+    let mimeType = 'text/plain';
+
+    switch (format) {
+      case 'hl7':
+        content = selectedConversion.original_hl7_content;
+        filename += '.hl7';
+        break;
+      case 'json':
+        content = selectedConversion.json_content ? JSON.stringify(selectedConversion.json_content, null, 2) : '{}';
+        filename += '.json';
+        mimeType = 'application/json';
+        break;
+      case 'xml':
+        content = selectedConversion.xml_content || '';
+        filename += '.xml';
+        mimeType = 'application/xml';
+        break;
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const getPatientInfoFromHL7 = (hl7Content: string) => {
+    const lines = hl7Content.split('\n');
+    let patientName = 'Unknown Patient';
+    let patientId = 'Unknown ID';
+
+    for (const line of lines) {
+      if (line.startsWith('PID')) {
+        const segments = line.split('|');
+        if (segments.length >= 6) {
+          const nameSegment = segments[5];
+          const idSegment = segments[3];
+          
+          if (nameSegment && nameSegment !== '') {
+            const nameParts = nameSegment.split('^');
+            if (nameParts.length >= 2) {
+              patientName = `${nameParts[0]} ${nameParts[1]}`.trim();
+            }
+          }
+          
+          if (idSegment && idSegment !== '') {
+            const idParts = idSegment.split('^');
+            if (idParts.length > 0) {
+              patientId = idParts[0];
+            }
+          }
+        }
+        break;
+      }
+    }
+
+    return { patientName, patientId };
+  };
+
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-4">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">Loading message data...</p>
+          <p className="text-muted-foreground">Loading conversions...</p>
         </div>
       </div>
     );
   }
 
-  if (!message) {
+  if (error && conversions.length === 0) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="container mx-auto p-6">
         <Card>
-          <CardContent className="p-6 text-center">
-            <p>Message not found</p>
-            <Button onClick={() => navigate({ to: '/workflow' })} className="mt-4">
-              Back to Patients
+          <CardContent className="pt-6 text-center">
+            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h2 className="text-xl font-semibold mb-2">Error Loading Conversions</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={fetchConversions}>
+              <Loader2 className="h-4 w-4 mr-2" />
+              Retry
             </Button>
           </CardContent>
         </Card>
@@ -164,137 +246,360 @@ export function Analytics() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex items-center space-x-4"
+        className="flex items-center justify-between"
       >
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => navigate({ to: '/workflow' })}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Message Analytics</h1>
+          <Button
+            variant="outline"
+            onClick={() => navigate({ to: '/workflow' })}
+            className="mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Patients
+          </Button>
+          <h1 className="text-3xl font-bold">Conversion Analytics</h1>
           <p className="text-muted-foreground">
-            Patient: {patientName} • Message ID: {messageId}
+            View and edit saved HL7 conversions
           </p>
         </div>
-      </motion.div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>HL7 Message Content</CardTitle>
-                <CardDescription>
-                  View and edit the HL7 message in different formats
-                </CardDescription>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant={isEditing ? "outline" : "default"}
-                  onClick={handleEditToggle}
-                  disabled={saving}
-                >
-                  <Edit className="h-4 w-4 mr-2" />
-                  {isEditing ? 'Cancel' : 'Edit'}
-                </Button>
-                {isEditing && (
-                  <Button onClick={handleSave} disabled={saving}>
-                    {saving ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    Save
-                  </Button>
+        
+        {selectedConversion && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant={isEditing ? "outline" : "default"}
+              onClick={handleEditToggle}
+              disabled={isSaving}
+            >
+              {isEditing ? (
+                <X className="h-4 w-4 mr-2" />
+              ) : (
+                <Edit className="h-4 w-4 mr-2" />
+              )}
+              {isEditing ? 'Cancel' : 'Edit'}
+            </Button>
+            
+            {isEditing && (
+              <Button onClick={handleSave} disabled={isSaving}>
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
                 )}
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Tabs value={activeFormat} onValueChange={(value) => handleFormatChange(value as any)}>
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="raw">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Raw HL7
-                </TabsTrigger>
-                <TabsTrigger value="json">
-                  <Code className="h-4 w-4 mr-2" />
-                  JSON
-                </TabsTrigger>
-                <TabsTrigger value="xml">
-                  <Code className="h-4 w-4 mr-2" />
-                  XML
-                </TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="raw" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary">Raw HL7 Format</Badge>
-                  {!isEditing && (
-                    <Badge variant="outline">
-                      {message.raw?.split('\n').length || 0} lines
-                    </Badge>
-                  )}
-                </div>
-                <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  readOnly={!isEditing}
-                  className="font-mono text-sm min-h-[400px]"
-                  placeholder="Raw HL7 content will appear here..."
-                />
-              </TabsContent>
-
-              <TabsContent value="json" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary">JSON Format</Badge>
-                  {!isEditing && (
-                    <Badge variant="outline">
-                      {message.json ? Object.keys(message.json).length : 0} properties
-                    </Badge>
-                  )}
-                </div>
-                <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  readOnly={!isEditing}
-                  className="font-mono text-sm min-h-[400px]"
-                  placeholder="JSON content will appear here..."
-                />
-              </TabsContent>
-
-              <TabsContent value="xml" className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary">XML Format</Badge>
-                  {!isEditing && (
-                    <Badge variant="outline">
-                      {message.xml?.split('>').length || 0} elements
-                    </Badge>
-                  )}
-                </div>
-                <Textarea
-                  value={editedContent}
-                  onChange={(e) => setEditedContent(e.target.value)}
-                  readOnly={!isEditing}
-                  className="font-mono text-sm min-h-[400px]"
-                  placeholder="XML content will appear here..."
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
+                Save
+              </Button>
+            )}
+          </div>
+        )}
       </motion.div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {saveSuccess && (
+        <Alert variant="default" className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            Conversion updated successfully!
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Conversions List Sidebar */}
+        <div className="lg:col-span-1">
+          <Card>
+            <CardHeader>
+              <CardTitle>Saved Conversions</CardTitle>
+              <CardDescription>
+                {conversions.length} conversion{conversions.length !== 1 ? 's' : ''}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ScrollArea className="h-[600px]">
+                <div className="space-y-2">
+                  {conversions.map((conversion) => {
+                    const { patientName } = getPatientInfoFromHL7(conversion.original_hl7_content);
+                    const isSelected = selectedConversion?.id === conversion.id;
+                    
+                    return (
+                      <motion.div
+                        key={conversion.id}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
+                      >
+                        <Card 
+                          className={`cursor-pointer transition-colors ${
+                            isSelected ? 'bg-muted border-primary' : 'hover:bg-muted/50'
+                          }`}
+                          onClick={() => handleConversionSelect(conversion)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                              <User className="h-4 w-4 text-muted-foreground" />
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium truncate">
+                                  {patientName}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">
+                                  {conversion.title || 'Untitled Conversion'}
+                                </p>
+                                <div className="flex items-center gap-1 mt-1">
+                                  <Calendar className="h-3 w-3" />
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(conversion.created_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="flex gap-1">
+                                {conversion.json_content && (
+                                  <Badge variant="secondary" className="text-xs">J</Badge>
+                                )}
+                                {conversion.xml_content && (
+                                  <Badge variant="secondary" className="text-xs">X</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Conversion Details */}
+        <div className="lg:col-span-3">
+          {selectedConversion ? (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>
+                      {isEditing ? (
+                        <Input
+                          value={editedConversion?.title || ''}
+                          onChange={(e) => handleFieldChange('title', e.target.value)}
+                          placeholder="Conversion Title"
+                          className="text-2xl font-bold"
+                        />
+                      ) : (
+                        selectedConversion.title || 'Untitled Conversion'
+                      )}
+                    </CardTitle>
+                    <CardDescription>
+                      {isEditing ? (
+                        <Input
+                          value={editedConversion?.description || ''}
+                          onChange={(e) => handleFieldChange('description', e.target.value)}
+                          placeholder="Conversion Description"
+                          className="mt-1"
+                        />
+                      ) : (
+                        selectedConversion.description || 'No description'
+                      )}
+                    </CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline">
+                      <User className="h-3 w-3 mr-1" />
+                      {selectedConversion.user_id || 'System'}
+                    </Badge>
+                    <Badge variant="secondary">
+                      <Calendar className="h-3 w-3 mr-1" />
+                      {new Date(selectedConversion.created_at).toLocaleDateString()}
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent>
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+                  <TabsList className="grid w-full grid-cols-4">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="hl7">HL7 Content</TabsTrigger>
+                    <TabsTrigger value="json" disabled={!selectedConversion.json_content}>
+                      JSON
+                    </TabsTrigger>
+                    <TabsTrigger value="xml" disabled={!selectedConversion.xml_content}>
+                      XML
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Overview Tab */}
+                  <TabsContent value="overview" className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Patient Information</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          {(() => {
+                            const { patientName, patientId } = getPatientInfoFromHL7(selectedConversion.original_hl7_content);
+                            return (
+                              <div className="space-y-2">
+                                <div>
+                                  <Label>Patient Name</Label>
+                                  <p className="font-medium">{patientName}</p>
+                                </div>
+                                <div>
+                                  <Label>Patient ID</Label>
+                                  <p className="font-medium">{patientId}</p>
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Conversion Details</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            <div>
+                              <Label>Available Formats</Label>
+                              <div className="flex gap-2 mt-1">
+                                <Badge variant="secondary">HL7</Badge>
+                                {selectedConversion.json_content && <Badge variant="secondary">JSON</Badge>}
+                                {selectedConversion.xml_content && <Badge variant="secondary">XML</Badge>}
+                              </div>
+                            </div>
+                            <div>
+                              <Label>HL7 Content Length</Label>
+                              <p>{selectedConversion.original_hl7_content.length} characters</p>
+                            </div>
+                            <div>
+                              <Label>Last Updated</Label>
+                              <p>{new Date(selectedConversion.updated_at).toLocaleString()}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button onClick={() => handleDownload('hl7')} variant="outline">
+                        <Download className="h-4 w-4 mr-2" />
+                        Download HL7
+                      </Button>
+                      {selectedConversion.json_content && (
+                        <Button onClick={() => handleDownload('json')} variant="outline">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download JSON
+                        </Button>
+                      )}
+                      {selectedConversion.xml_content && (
+                        <Button onClick={() => handleDownload('xml')} variant="outline">
+                          <Download className="h-4 w-4 mr-2" />
+                          Download XML
+                        </Button>
+                      )}
+                    </div>
+                  </TabsContent>
+
+                  {/* HL7 Content Tab */}
+                  <TabsContent value="hl7">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>HL7 Message Content</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {isEditing ? (
+                          <Textarea
+                            value={editedConversion?.original_hl7_content || ''}
+                            onChange={(e) => handleContentChange(e.target.value, 'hl7')}
+                            className="min-h-[400px] font-mono text-sm"
+                            placeholder="HL7 message content..."
+                          />
+                        ) : (
+                          <ScrollArea className="h-[400px]">
+                            <pre className="font-mono text-sm whitespace-pre-wrap">
+                              {selectedConversion.original_hl7_content}
+                            </pre>
+                          </ScrollArea>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* JSON Tab */}
+                  <TabsContent value="json">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>JSON Conversion</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {isEditing ? (
+                          <Textarea
+                            value={editedConversion?.json_content ? JSON.stringify(editedConversion.json_content, null, 2) : ''}
+                            onChange={(e) => handleContentChange(e.target.value, 'json')}
+                            className="min-h-[400px] font-mono text-sm"
+                            placeholder="JSON content..."
+                          />
+                        ) : (
+                          <ScrollArea className="h-[400px]">
+                            <pre className="font-mono text-sm">
+                              {JSON.stringify(selectedConversion.json_content, null, 2)}
+                            </pre>
+                          </ScrollArea>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+
+                  {/* XML Tab */}
+                  <TabsContent value="xml">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>XML Conversion</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {isEditing ? (
+                          <Textarea
+                            value={editedConversion?.xml_content || ''}
+                            onChange={(e) => handleContentChange(e.target.value, 'xml')}
+                            className="min-h-[400px] font-mono text-sm"
+                            placeholder="XML content..."
+                          />
+                        ) : (
+                          <ScrollArea className="h-[400px]">
+                            <pre className="font-mono text-sm">
+                              {selectedConversion.xml_content}
+                            </pre>
+                          </ScrollArea>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </TabsContent>
+                </Tabs>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <FileText className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No Conversion Selected</h3>
+                <p className="text-muted-foreground">
+                  Select a conversion from the list to view details
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
