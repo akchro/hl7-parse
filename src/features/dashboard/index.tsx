@@ -92,11 +92,11 @@ export default function HL7Dashboard() {
             >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-blue-100 dark:bg-blue-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">
-                  <FileCode className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+                  <FileCode className="h-8 w-8 text-black dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">HL7 Conversion</h3>
-                  <p className="text-muted-foreground">
+                  <h3 className="text-xl font-semibold mb-2 text-white">HL7 Conversion</h3>
+                  <p className="text-white">
                     Convert HL7 messages to JSON, XML, or PDF formats with AI-powered parsing
                   </p>
                 </div>
@@ -117,11 +117,11 @@ export default function HL7Dashboard() {
             >
               <CardContent className="p-8 text-center space-y-4">
                 <div className="bg-green-100 dark:bg-green-900/30 w-16 h-16 rounded-full flex items-center justify-center mx-auto group-hover:bg-green-200 dark:group-hover:bg-green-800/50 transition-colors">
-                  <Stethoscope className="h-8 w-8 text-green-600 dark:text-green-400" />
+                  <Stethoscope className="h-8 w-8 text-black dark:text-white" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold mb-2">Patient Triage</h3>
-                  <p className="text-muted-foreground">
+                  <h3 className="text-xl font-semibold mb-2 text-white">Patient Triage</h3>
+                  <p className="text-white">
                     Analyze patient data and prioritize cases using intelligent triage algorithms
                   </p>
                 </div>
