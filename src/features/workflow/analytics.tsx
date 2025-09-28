@@ -62,6 +62,8 @@ export function Analytics() {
   const [error, setError] = useState<string | null>(null)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [activeTab, setActiveTab] = useState('overview')
+  const [hospitalName, setHospitalName] = useState('')
+  const [sendMessage, setSendMessage] = useState('')
 
   // Fetch saved conversions
   useEffect(() => {
@@ -285,6 +287,11 @@ export function Analytics() {
     a.download = filename
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  const handleSendHospital = () => {
+    setSendMessage('Sent successfully')
+    setTimeout(() => setSendMessage(''), 3000)
   }
 
   const getPatientInfoFromHL7 = (hl7Content: string) => {
@@ -682,6 +689,32 @@ export function Analytics() {
                           </CardContent>
                         </Card>
                       </div>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className='text-lg'>
+                            Send to Hospital
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className='space-y-3'>
+                            <div className='flex gap-2 items-center'>
+                              <Input
+                                placeholder='Enter hospital name...'
+                                value={hospitalName}
+                                onChange={(e) => setHospitalName(e.target.value)}
+                                className='flex-1'
+                              />
+                              <Button onClick={handleSendHospital} disabled={!hospitalName.trim()}>
+                                Send
+                              </Button>
+                            </div>
+                            {sendMessage && (
+                              <p className='text-sm text-green-600 font-medium'>{sendMessage}</p>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
 
                       <div className='flex gap-2'>
                         <Button

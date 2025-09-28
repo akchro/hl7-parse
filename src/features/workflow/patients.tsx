@@ -41,6 +41,8 @@ export function Patients() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [copiedType, setCopiedType] = useState<string | null>(null);
+  const [hospitalName, setHospitalName] = useState('');
+  const [sendMessage, setSendMessage] = useState('');
 
   // Fetch saved conversions from the database
   useEffect(() => {
@@ -107,6 +109,11 @@ export function Patients() {
     } catch (err) {
       console.error('Failed to copy text: ', err);
     }
+  };
+
+  const handleSendHospital = () => {
+    setSendMessage('Sent successfully');
+    setTimeout(() => setSendMessage(''), 3000);
   };
 
   const getPatientInfoFromHL7 = (hl7Content: string) => {
@@ -382,6 +389,24 @@ export function Patients() {
                       <span className="text-muted-foreground">Description:</span>
                       <p className="text-sm">{selectedConversion.description}</p>
                     </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <h4 className="font-semibold">Send to Hospital</h4>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      placeholder="Enter hospital name..."
+                      value={hospitalName}
+                      onChange={(e) => setHospitalName(e.target.value)}
+                      className="flex-1"
+                    />
+                    <Button onClick={handleSendHospital} disabled={!hospitalName.trim()}>
+                      Send
+                    </Button>
+                  </div>
+                  {sendMessage && (
+                    <p className="text-sm text-green-600 font-medium">{sendMessage}</p>
                   )}
                 </div>
 
