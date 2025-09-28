@@ -2,7 +2,7 @@ import { HTMLAttributes, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { IconBrandFacebook, IconBrandGithub } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -19,18 +19,19 @@ import { PasswordInput } from '@/components/password-input'
 
 type UserAuthFormProps = HTMLAttributes<HTMLFormElement>
 
+// Hardcoded credentials
+const HARDCODED_EMAIL = 'admin@example.com'
+const HARDCODED_PASSWORD = 'password123'
+
 const formSchema = z.object({
-  email: z.email({
-    error: (iss) => (iss.input === '' ? 'Please enter your email' : undefined),
-  }),
-  password: z
-    .string()
-    .min(1, 'Please enter your password')
-    .min(7, 'Password must be at least 7 characters long'),
+  email: z.string().email('Please enter a valid email address'),
+  password: z.string().min(1, 'Please enter your password'),
 })
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
+  const [authError, setAuthError] = useState('')
+  const navigate = useNavigate()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,12 +43,20 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
+    setAuthError('')
 
+    // Simulate API call delay
     setTimeout(() => {
+      // Check against hardcoded credentials
+      if (data.email === HARDCODED_EMAIL && data.password === HARDCODED_PASSWORD) {
+        // Successful login - navigate to dashboard
+        navigate({ to: '/dash' })
+      } else {
+        // Failed login
+        setAuthError('Invalid email or password')
+      }
       setIsLoading(false)
-    }, 3000)
+    }, 1000)
   }
 
   return (
@@ -64,7 +73,11 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input 
+                  placeholder='name@example.com' 
+                  {...field} 
+                  type='email'
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -89,8 +102,16 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             </FormItem>
           )}
         />
+        
+        {/* Authentication error message */}
+        {authError && (
+          <div className='text-sm font-medium text-destructive text-center'>
+            {authError}
+          </div>
+        )}
+        
         <Button className='mt-2' disabled={isLoading}>
-          Login
+          {isLoading ? 'Logging in...' : 'Login'}
         </Button>
 
         <div className='relative my-2'>
@@ -105,10 +126,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         </div>
 
         <div className='grid grid-cols-2 gap-2'>
-          <Button variant='outline' type='button' disabled={isLoading} asChild>
-            <Link to="/dash">
-              <IconBrandGithub className='h-4 w-4' /> GitHub
-            </Link>
+          <Button variant='outline' type='button' disabled={isLoading}>
+            <IconBrandGithub className='h-4 w-4' /> GitHub
           </Button>
           <Button variant='outline' type='button' disabled={isLoading}>
             <IconBrandFacebook className='h-4 w-4' /> Facebook

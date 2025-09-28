@@ -262,6 +262,12 @@ export default function HL7MedicalConverter() {
         body: JSON.stringify(saveData),
       });
 
+      // Friendly duplicate message
+      if (response.status === 409) {
+        setError('This HL7 message has already been saved.');
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
