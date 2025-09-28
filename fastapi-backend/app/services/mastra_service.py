@@ -179,6 +179,28 @@ class MastraService:
         except Exception:
             return False
     
+    async def analyze_triage(self, hl7_messages: list[str]) -> Dict[str, Any]:
+        """
+        Analyze multiple HL7 messages for medical triage severity assessment
+        """
+        try:
+            async with httpx.AsyncClient(timeout=120) as client:  # Longer timeout for AI processing
+                response = await client.post(
+                    f"{self.mastra_endpoint}/triage-analysis",
+                    json={
+                        "hl7_messages": hl7_messages,
+                        "patient_count": len(hl7_messages)
+                    }
+                )
+                response.raise_for_status()
+                return response.json()
+        except httpx.HTTPError as e:
+            logger.error(f"HTTP error calling Mastra triage analysis: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"Error calling Mastra triage analysis: {e}")
+            raise
+    
     async def get_agent_status(self, agent_name: str) -> Dict[str, Any]:
         """
         Get status of a specific Mastra agent
@@ -493,6 +515,67 @@ This is a mock medical report generated for demonstration purposes."""
 Name: John Doe\\
 ID: 123456789\\
 \end{document}"""
+    
+    async def analyze_triage(self, hl7_messages: list[str]) -> Dict[str, Any]:
+        """Mock triage analysis"""
+        await asyncio.sleep(3)  # Simulate AI processing time
+        
+        mock_results = []
+        severity_scores = [85, 72, 58, 91, 45]  # Mix of different severity levels
+        priority_levels = ["Emergent", "Urgent", "Non-urgent", "Immediate", "Delayed"]
+        timelines = ["Within 15 minutes", "Within 1 hour", "Within 2-4 hours", "Immediate", "Routine"]
+        
+        for i, hl7_content in enumerate(hl7_messages):
+            # Extract mock patient info from HL7
+            lines = hl7_content.split('\n')
+            patient_name = f"Patient {i+1}"
+            patient_id = f"P{12345 + i}"
+            
+            # Try to extract real patient name if available
+            for line in lines:
+                if line.startswith('PID'):
+                    segments = line.split('|')
+                    if len(segments) >= 6:
+                        name_segment = segments[5]
+                        if name_segment:
+                            name_parts = name_segment.split('^')
+                            if len(name_parts) >= 2:
+                                patient_name = f"{name_parts[1]} {name_parts[0]}".strip()
+                        id_segment = segments[3]
+                        if id_segment:
+                            id_parts = id_segment.split('^')
+                            if id_parts:
+                                patient_id = id_parts[0]
+                    break
+            
+            score_index = i % len(severity_scores)
+            mock_results.append({
+                "patient_id": patient_id,
+                "patient_name": patient_name,
+                "severity_score": severity_scores[score_index],
+                "priority_level": priority_levels[score_index],
+                "clinical_summary": f"Mock clinical assessment for {patient_name}",
+                "key_findings": [
+                    "Vital signs reviewed",
+                    "Medical history assessed",
+                    "Clinical presentation evaluated"
+                ],
+                "recommended_timeline": timelines[score_index],
+                "reasoning": f"Based on clinical indicators and triage protocols, assigned severity score of {severity_scores[score_index]}"
+            })
+        
+        # Sort by severity score (highest first)
+        mock_results.sort(key=lambda x: x["severity_score"], reverse=True)
+        
+        return {
+            "success": True,
+            "data": mock_results,
+            "metadata": {
+                "patientsAnalyzed": len(mock_results),
+                "timestamp": "2024-12-01T12:00:00Z",
+                "triageProtocols": ["ESI", "CTAS", "MTS"]
+            }
+        }
     
     async def health_check(self) -> bool:
         """Mock health check always returns True"""
