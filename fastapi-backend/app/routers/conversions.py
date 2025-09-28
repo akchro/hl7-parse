@@ -16,7 +16,9 @@ from app.models.conversion_models import (
     SaveConversionRequest, 
     SaveConversionResponse, 
     SavedConversionResponse,
-    SavedConversionListResponse
+    SavedConversionListResponse,
+    UpdateJsonContentRequest,
+    JsonContentResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -37,14 +39,15 @@ async def save_conversion(
             raise HTTPException(status_code=400, detail="HL7 content is required")
         
         # Validate that we have at least one converted format
-        if not request.json_content and not request.xml_content:
-            raise HTTPException(status_code=400, detail="At least one converted format (JSON or XML) is required")
+        if not request.json_content and not request.xml_content and not request.pdf_base64:
+            raise HTTPException(status_code=400, detail="At least one converted format (JSON, XML, or PDF) is required")
         
         # Create new SavedConversion record
         saved_conversion = SavedConversion(
             original_hl7_content=request.hl7_content,
             json_content=request.json_content,
             xml_content=request.xml_content,
+            pdf_base64=request.pdf_base64,
             conversion_metadata=request.conversion_metadata,
             title=request.title,
             description=request.description,
@@ -129,6 +132,7 @@ async def list_saved_conversions(
                 original_hl7_content=conv.original_hl7_content,
                 json_content=conv.json_content,
                 xml_content=conv.xml_content,
+                pdf_base64=conv.pdf_base64,
                 conversion_metadata=conv.conversion_metadata,
                 user_id=conv.user_id,
                 created_at=conv.created_at,
@@ -178,6 +182,7 @@ async def get_saved_conversion(
             original_hl7_content=conversion.original_hl7_content,
             json_content=conversion.json_content,
             xml_content=conversion.xml_content,
+            pdf_base64=conversion.pdf_base64,
             conversion_metadata=conversion.conversion_metadata,
             user_id=conversion.user_id,
             created_at=conversion.created_at,
@@ -230,3 +235,94 @@ async def delete_saved_conversion(
         logger.error(f"Error deleting saved conversion: {e}")
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to delete conversion: {str(e)}")
+
+@router.get("/{conversion_id}/json", response_model=JsonContentResponse)
+async def get_json_content(
+    conversion_id: str,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Get only the JSON content of a specific saved conversion by ID
+    """
+    try:
+        # Validate UUID format
+        try:
+            uuid.UUID(conversion_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid conversion ID format")
+        
+        # Query for the conversion
+        query = select(SavedConversion).where(SavedConversion.id == conversion_id)
+        result = await db.execute(query)
+        conversion = result.scalar_one_or_none()
+        
+        if not conversion:
+            raise HTTPException(status_code=404, detail="Conversion not found")
+        
+        return JsonContentResponse(
+            id=str(conversion.id),
+            json_content=conversion.json_content,
+            title=conversion.title,
+            description=conversion.description,
+            updated_at=conversion.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting JSON content: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get JSON content: {str(e)}")
+
+@router.put("/{conversion_id}/json", response_model=JsonContentResponse)
+async def update_json_content(
+    conversion_id: str,
+    request: UpdateJsonContentRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Update the JSON content of a specific saved conversion by ID
+    """
+    try:
+        # Validate UUID format
+        try:
+            uuid.UUID(conversion_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid conversion ID format")
+        
+        # Query for the conversion
+        query = select(SavedConversion).where(SavedConversion.id == conversion_id)
+        result = await db.execute(query)
+        conversion = result.scalar_one_or_none()
+        
+        if not conversion:
+            raise HTTPException(status_code=404, detail="Conversion not found")
+        
+        # Update the conversion
+        conversion.json_content = request.json_content
+        
+        # Update title and description if provided
+        if request.title is not None:
+            conversion.title = request.title
+        if request.description is not None:
+            conversion.description = request.description
+        
+        # The updated_at field will be automatically updated by the database
+        await db.commit()
+        await db.refresh(conversion)
+        
+        logger.info(f"Updated JSON content for conversion ID: {conversion_id}")
+        
+        return JsonContentResponse(
+            id=str(conversion.id),
+            json_content=conversion.json_content,
+            title=conversion.title,
+            description=conversion.description,
+            updated_at=conversion.updated_at
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating JSON content: {e}")
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update JSON content: {str(e)}")

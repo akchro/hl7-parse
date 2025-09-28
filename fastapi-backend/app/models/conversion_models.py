@@ -12,6 +12,7 @@ class SaveConversionRequest(BaseModel):
     hl7_content: str = Field(..., description="Original HL7 message content")
     json_content: Optional[Dict[str, Any]] = Field(None, description="Converted JSON data")
     xml_content: Optional[str] = Field(None, description="Converted XML data")
+    pdf_base64: Optional[str] = Field(None, description="PDF as base64 encoded string")
     conversion_metadata: Optional[Dict[str, Any]] = Field(None, description="Metadata from conversion process")
     title: Optional[str] = Field(None, max_length=200, description="Optional title for the saved conversion")
     description: Optional[str] = Field(None, description="Optional description")
@@ -51,6 +52,7 @@ class SavedConversionResponse(BaseModel):
     original_hl7_content: str = Field(..., description="Original HL7 message content")
     json_content: Optional[Dict[str, Any]] = Field(None, description="Converted JSON data")
     xml_content: Optional[str] = Field(None, description="Converted XML data")
+    pdf_base64: Optional[str] = Field(None, description="PDF as base64 encoded string")
     conversion_metadata: Optional[Dict[str, Any]] = Field(None, description="Conversion metadata")
     user_id: Optional[str] = Field(None, description="User identifier")
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -85,5 +87,53 @@ class SavedConversionListResponse(BaseModel):
                 "total": 0,
                 "page": 1,
                 "per_page": 10
+            }
+        }
+
+class UpdateJsonContentRequest(BaseModel):
+    """Request model for updating JSON content of a saved conversion"""
+    json_content: Dict[str, Any] = Field(..., description="Updated JSON content")
+    title: Optional[str] = Field(None, max_length=200, description="Optional updated title")
+    description: Optional[str] = Field(None, description="Optional updated description")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "json_content": {
+                    "message_type": "ADT",
+                    "patient": {
+                        "name": "John Doe",
+                        "id": "12345",
+                        "dob": "1990-01-01"
+                    },
+                    "visit": {
+                        "admission_date": "2023-01-01T12:00:00"
+                    }
+                },
+                "title": "Updated Patient Admission - John Doe",
+                "description": "Updated ADT message with additional patient info"
+            }
+        }
+
+class JsonContentResponse(BaseModel):
+    """Response model for JSON content operations"""
+    id: str = Field(..., description="UUID of the saved conversion")
+    json_content: Optional[Dict[str, Any]] = Field(None, description="JSON content")
+    title: Optional[str] = Field(None, description="Title of the saved conversion")
+    description: Optional[str] = Field(None, description="Description of the saved conversion")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+    
+    class Config:
+        from_attributes = True
+        json_schema_extra = {
+            "example": {
+                "id": "123e4567-e89b-12d3-a456-426614174000",
+                "json_content": {
+                    "message_type": "ADT",
+                    "patient": {"name": "John Doe"}
+                },
+                "title": "Patient Admission - John Doe",
+                "description": "ADT message for patient admission",
+                "updated_at": "2023-01-01T12:00:00"
             }
         }

@@ -150,6 +150,46 @@ export function Analytics() {
     }
   };
 
+  const handleUpdateJsonContent = async (jsonContent: Record<string, any>) => {
+    if (!selectedConversion) return;
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/v1/conversions/${selectedConversion.id}/json`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          json_content: jsonContent
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update JSON content');
+      }
+
+      const updatedConversion = await response.json();
+      
+      // Update local state
+      setConversions(conversions.map(conv => 
+        conv.id === selectedConversion.id ? updatedConversion : conv
+      ));
+      setSelectedConversion(updatedConversion);
+      setEditedConversion(updatedConversion);
+      setSaveSuccess(true);
+      
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setError('Failed to update JSON content');
+      console.error('Error updating JSON content:', err);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleDownload = (format: 'hl7' | 'json' | 'xml') => {
     if (!selectedConversion) return;
 
@@ -189,7 +229,7 @@ export function Analytics() {
     let patientId = 'Unknown ID';
 
     for (const line of lines) {
-      if (line.startsWith('PID')) {
+      if (line.trim().startsWith('PID')) {
         const segments = line.split('|');
         if (segments.length >= 6) {
           const nameSegment = segments[5];
@@ -198,7 +238,8 @@ export function Analytics() {
           if (nameSegment && nameSegment !== '') {
             const nameParts = nameSegment.split('^');
             if (nameParts.length >= 2) {
-              patientName = `${nameParts[0]} ${nameParts[1]}`.trim();
+              // Format: LAST^FIRST^MIDDLE, so display as FIRST LAST
+              patientName = `${nameParts[1]} ${nameParts[0]}`.trim();
             }
           }
           
@@ -539,16 +580,55 @@ export function Analytics() {
                   <TabsContent value="json">
                     <Card>
                       <CardHeader>
-                        <CardTitle>JSON Conversion</CardTitle>
+                        <div className="flex items-center justify-between">
+                          <CardTitle>JSON Conversion</CardTitle>
+                          {!isEditing && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                if (editedConversion?.json_content) {
+                                  handleUpdateJsonContent(editedConversion.json_content);
+                                }
+                              }}
+                              disabled={isSaving || !editedConversion?.json_content}
+                            >
+                              {isSaving ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : (
+                                <Save className="h-4 w-4 mr-2" />
+                              )}
+                              Update JSON
+                            </Button>
+                          )}
+                        </div>
                       </CardHeader>
                       <CardContent>
                         {isEditing ? (
-                          <Textarea
-                            value={editedConversion?.json_content ? JSON.stringify(editedConversion.json_content, null, 2) : ''}
-                            onChange={(e) => handleContentChange(e.target.value, 'json')}
-                            className="min-h-[400px] font-mono text-sm"
-                            placeholder="JSON content..."
-                          />
+                          <div className="space-y-4">
+                            <Textarea
+                              value={editedConversion?.json_content ? JSON.stringify(editedConversion.json_content, null, 2) : ''}
+                              onChange={(e) => handleContentChange(e.target.value, 'json')}
+                              className="min-h-[400px] font-mono text-sm"
+                              placeholder="JSON content..."
+                            />
+                            <Button
+                              onClick={() => {
+                                if (editedConversion?.json_content) {
+                                  handleUpdateJsonContent(editedConversion.json_content);
+                                }
+                              }}
+                              disabled={isSaving || !editedConversion?.json_content}
+                              className="w-full"
+                            >
+                              {isSaving ? (
+                                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                              ) : (
+                                <Save className="h-4 w-4 mr-2" />
+                              )}
+                              Update JSON Content Only
+                            </Button>
+                          </div>
                         ) : (
                           <ScrollArea className="h-[400px]">
                             <pre className="font-mono text-sm">

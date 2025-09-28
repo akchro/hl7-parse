@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -42,7 +42,6 @@ interface ConversionResult {
 export default function HL7MedicalConverter() {
   const [hl7Input, setHl7Input] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<{ json: boolean; xml: boolean; plain: boolean; latex: boolean }>({ 
@@ -51,11 +50,9 @@ export default function HL7MedicalConverter() {
     plain: false, 
     latex: false 
   });
-  const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [saveTitle, setSaveTitle] = useState('');
-  const [saveDescription, setSaveDescription] = useState('');
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string>('');
   const [activeTab, setActiveTab] = useState('json');
 
   const handleConvert = async () => {
@@ -69,7 +66,7 @@ export default function HL7MedicalConverter() {
     setResult(null);
 
     try {
-      // First get JSON/XML conversion
+      // Step 1: Get JSON/XML conversion
       const response = await fetch('/api/v1/mastra/convert/both', {
         method: 'POST',
         headers: {
@@ -85,36 +82,104 @@ export default function HL7MedicalConverter() {
       }
 
       const data = await response.json();
-      
-      if (data.success) {
-        // Also get plain English conversion
-        const plainEnglishResponse = await fetch('/api/v1/mastra/convert/plain-english', {
+
+      if (!data.success) {
+        setError(data.message || 'Conversion failed');
+        return;
+      }
+
+      // Step 2: Get plain English conversion
+      const plainEnglishResponse = await fetch('/api/v1/mastra/convert/plain-english', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          hl7_content: hl7Input,
+        }),
+      });
+
+      let medicalDoc: MedicalDocumentResult = {};
+      if (plainEnglishResponse.ok) {
+        const plainData = await plainEnglishResponse.json();
+        if (plainData.success) {
+          medicalDoc.plainEnglish = plainData.data.plainEnglish;
+          medicalDoc.timestamp = plainData.data.timestamp;
+        }
+      }
+
+      // Step 3: Generate PDF medical document
+      try {
+        const pdfResponse = await fetch('/api/v1/mastra/convert/medical-document', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
             hl7_content: hl7Input,
+            generatePdf: true,
+            format: 'both'
           }),
         });
 
-        let medicalDoc: MedicalDocumentResult = {};
-        if (plainEnglishResponse.ok) {
-          const plainData = await plainEnglishResponse.json();
-          if (plainData.success) {
-            medicalDoc.plainEnglish = plainData.data.plainEnglish;
-            medicalDoc.timestamp = plainData.data.timestamp;
+        if (pdfResponse.ok) {
+          const pdfData = await pdfResponse.json();
+          if (pdfData.success) {
+            medicalDoc = { ...medicalDoc, ...pdfData.data };
           }
         }
-
-        setResult({
-          ...data.data,
-          medicalDocument: medicalDoc
-        });
-        setActiveTab('json');
-      } else {
-        setError(data.message || 'Conversion failed');
+      } catch (pdfError) {
+        console.warn('PDF generation failed, continuing without PDF:', pdfError);
       }
+
+      const finalResult = {
+        ...data.data,
+        medicalDocument: medicalDoc
+      };
+
+      setResult(finalResult);
+      setActiveTab('json');
+
+      // Step 4: Auto-save to database
+      try {
+        const saveData = {
+          hl7_content: hl7Input,
+          json_content: finalResult.json?.success ? finalResult.json.content : null,
+          xml_content: finalResult.xml?.success ? finalResult.xml.content : null,
+          plain_english: finalResult.medicalDocument?.plainEnglish,
+          latex_content: finalResult.medicalDocument?.latex,
+          html_content: finalResult.medicalDocument?.html,
+          pdf_base64: finalResult.medicalDocument?.pdfBase64,
+          conversion_metadata: {
+            json_metadata: finalResult.json?.metadata,
+            xml_metadata: finalResult.xml?.metadata,
+            conversion_timestamp: new Date().toISOString()
+          },
+          title: `HL7 Conversion - ${new Date().toLocaleString()}`,
+          description: 'Auto-saved conversion'
+        };
+
+        const saveResponse = await fetch('/api/v1/conversions/save', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(saveData),
+        });
+
+        if (saveResponse.ok) {
+          const saveResponseData = await saveResponse.json();
+          if (saveResponseData.success) {
+            setSaveSuccess(true);
+            setTimeout(() => setSaveSuccess(false), 3000);
+          }
+        } else if (saveResponse.status !== 409) { // Ignore duplicate errors
+          console.warn('Auto-save failed, but conversion succeeded');
+        }
+      } catch (saveError) {
+        console.warn('Auto-save failed, but conversion succeeded:', saveError);
+      }
+
     } catch (err) {
       console.error('Conversion error:', err);
       setError(err instanceof Error ? err.message : 'An unexpected error occurred');
@@ -123,50 +188,6 @@ export default function HL7MedicalConverter() {
     }
   };
 
-  const handleGenerateMedicalDocument = async () => {
-    if (!hl7Input.trim()) {
-      setError('Please enter an HL7 message');
-      return;
-    }
-
-    setIsGeneratingPdf(true);
-    setError(null);
-
-    try {
-      const response = await fetch('/api/v1/mastra/convert/medical-document', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          hl7_content: hl7Input,
-          generatePdf: true,
-          format: 'both'
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (data.success) {
-        setResult(prev => ({
-          ...prev,
-          medicalDocument: data.data
-        }));
-        setActiveTab('medical');
-      } else {
-        setError(data.message || 'Failed to generate medical document');
-      }
-    } catch (err) {
-      console.error('Medical document generation error:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
-    } finally {
-      setIsGeneratingPdf(false);
-    }
-  };
 
   const copyToClipboard = async (text: string, type: 'json' | 'xml' | 'plain' | 'latex') => {
     try {
@@ -200,7 +221,6 @@ export default function HL7MedicalConverter() {
 
   const viewPdf = () => {
     if (result?.medicalDocument?.pdfBase64) {
-      // Try to open PDF in a new tab first, fallback to modal if needed
       try {
         const byteCharacters = atob(result.medicalDocument.pdfBase64);
         const byteNumbers = new Array(byteCharacters.length);
@@ -211,86 +231,26 @@ export default function HL7MedicalConverter() {
         const blob = new Blob([byteArray], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         
-        // Open in new tab
+        // Try to open in new tab - this will use Chrome's default PDF viewer
         const newWindow = window.open(url, '_blank');
         if (newWindow) {
-          // Clean up URL after a delay
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
+          // Clean up URL after the tab has loaded
+          newWindow.onload = () => {
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+          };
         } else {
-          // Fallback to modal if popup blocked
+          // Fallback to modal if popup blocked, but also use blob URL
+          setPdfBlobUrl(url);
           setPdfDialogOpen(true);
-          URL.revokeObjectURL(url);
+          // Don't revoke URL yet as modal needs it
         }
       } catch (error) {
         console.error('Error opening PDF:', error);
-        setPdfDialogOpen(true);
+        setError('Failed to open PDF. Please try downloading instead.');
       }
     }
   };
 
-  const handleSaveConversion = async () => {
-    if (!result || !hl7Input.trim()) {
-      setError('No conversion data to save');
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveSuccess(false);
-    setError(null);
-
-    try {
-      const saveData = {
-        hl7_content: hl7Input,
-        json_content: result.json?.success ? result.json.content : null,
-        xml_content: result.xml?.success ? result.xml.content : null,
-        plain_english: result.medicalDocument?.plainEnglish,
-        latex_content: result.medicalDocument?.latex,
-        html_content: result.medicalDocument?.html,
-        pdf_base64: result.medicalDocument?.pdfBase64,
-        conversion_metadata: {
-          json_metadata: result.json?.metadata,
-          xml_metadata: result.xml?.metadata,
-          conversion_timestamp: new Date().toISOString()
-        },
-        title: saveTitle.trim() || undefined,
-        description: saveDescription.trim() || undefined
-      };
-
-      const response = await fetch('/api/v1/conversions/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(saveData),
-      });
-
-      // Friendly duplicate message
-      if (response.status === 409) {
-        setError('This HL7 message has already been saved.');
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const responseData = await response.json();
-      
-      if (responseData.success) {
-        setSaveSuccess(true);
-        setSaveTitle('');
-        setSaveDescription('');
-        setTimeout(() => setSaveSuccess(false), 3000);
-      } else {
-        setError(responseData.message || 'Failed to save conversion');
-      }
-    } catch (err) {
-      console.error('Save error:', err);
-      setError(err instanceof Error ? err.message : 'An unexpected error occurred while saving');
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const sampleHL7 = `MSH|^~\\&|SENDING_APP|SENDING_FAC|RECEIVING_APP|RECEIVING_FAC|20230101120000||ADT^A01^ADT_A01|123456789|P|2.5
 EVN||202301011200|||^USER^USER^^^^^^USER
@@ -304,6 +264,22 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
     setResult(null);
     setError(null);
   };
+
+  // Cleanup blob URL when component unmounts or dialog closes
+  useEffect(() => {
+    return () => {
+      if (pdfBlobUrl) {
+        URL.revokeObjectURL(pdfBlobUrl);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!pdfDialogOpen && pdfBlobUrl) {
+      URL.revokeObjectURL(pdfBlobUrl);
+      setPdfBlobUrl('');
+    }
+  }, [pdfDialogOpen, pdfBlobUrl]);
 
   return (
     <>
@@ -319,10 +295,9 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
       {/* ===== Top Heading ===== */}
             
       <div className="mb-8">
-        
-        <h1 className="text-3xl font-bold mb-2">HL7 Medical Document Converter</h1>
+        <h1 className="text-3xl font-bold mb-2">HL7 Medical Document Processor</h1>
         <p className="text-muted-foreground">
-          Convert HL7 messages to readable medical documents with PDF generation
+          Convert HL7 messages to JSON/XML, generate PDF medical documents, and save to database in one step
         </p>
       </div>
 
@@ -332,7 +307,7 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
           <CardHeader>
             <CardTitle>HL7 Input</CardTitle>
             <CardDescription>
-              Paste your HL7 message below and click convert
+              Paste your HL7 message below and click process to convert, generate PDF, and save
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -347,30 +322,17 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                 onClick={handleConvert}
                 disabled={isLoading || !hl7Input.trim()}
                 className="flex-1"
+                size="lg"
               >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Converting...
-                  </>
-                ) : (
-                  'Convert to JSON/XML'
-                )}
-              </Button>
-              <Button
-                onClick={handleGenerateMedicalDocument}
-                disabled={isGeneratingPdf || !hl7Input.trim()}
-                variant="secondary"
-              >
-                {isGeneratingPdf ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
+                    Processing...
                   </>
                 ) : (
                   <>
                     <FileText className="mr-2 h-4 w-4" />
-                    Generate Medical Doc
+                    Convert, Generate PDF & Save
                   </>
                 )}
               </Button>
@@ -556,10 +518,18 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
                       {result.medicalDocument.html && (
                         <div className="space-y-2">
                           <h3 className="text-lg font-semibold">Document Preview</h3>
-                          <div 
-                            className="bg-white p-4 rounded-md border overflow-auto max-h-[400px]"
-                            dangerouslySetInnerHTML={{ __html: result.medicalDocument.html }}
-                          />
+                          <div className="bg-white border rounded-lg overflow-hidden">
+                            <iframe
+                              srcDoc={result.medicalDocument.html}
+                              className="w-full h-96 border-0"
+                              title="Medical Document Preview"
+                              sandbox="allow-same-origin"
+                              style={{
+                                backgroundColor: 'white',
+                                colorScheme: 'normal'
+                              }}
+                            />
+                          </div>
                         </div>
                       )}
                       <div className="mt-4 p-4 bg-muted rounded-md">
@@ -580,65 +550,41 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
         </Card>
       </div>
 
-      {/* Save Conversion Section */}
+      {/* Processing Status Section */}
       {result && (result.json?.success || result.xml?.success || result.medicalDocument?.plainEnglish) && (
         <Card className="mt-6">
           <CardHeader>
-            <CardTitle>Save Conversion</CardTitle>
+            <CardTitle>Processing Complete</CardTitle>
             <CardDescription>
-              Save this conversion to the database for future reference
+              Your HL7 message has been processed and automatically saved to the database
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <label htmlFor="save-title" className="text-sm font-medium">
-                  Title (optional)
-                </label>
-                <Input
-                  id="save-title"
-                  placeholder="e.g., Patient Admission - John Doe"
-                  value={saveTitle}
-                  onChange={(e) => setSaveTitle(e.target.value)}
-                  maxLength={200}
-                />
+            {saveSuccess && (
+              <div className="flex items-center gap-2 text-green-600 bg-green-50 p-3 rounded-md">
+                <CheckCircle className="h-5 w-5" />
+                <span className="font-medium">Successfully saved to database!</span>
               </div>
-              <div>
-                <label htmlFor="save-description" className="text-sm font-medium">
-                  Description (optional)
-                </label>
-                <Input
-                  id="save-description"
-                  placeholder="e.g., ADT message for patient admission"
-                  value={saveDescription}
-                  onChange={(e) => setSaveDescription(e.target.value)}
-                />
-              </div>
-            </div>
-            <div className="flex gap-2 items-center">
-              <Button
-                onClick={handleSaveConversion}
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save Conversion
-                  </>
-                )}
-              </Button>
-              {saveSuccess && (
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle className="h-4 w-4" />
-                  <span className="text-sm">Saved successfully!</span>
+            )}
+            <div className="grid gap-4 md:grid-cols-3 text-center">
+              <div className="p-3 bg-blue-50 rounded-md">
+                <div className="text-lg font-semibold text-blue-600">
+                  {result.json?.success && result.xml?.success ? '✓' : '✗'}
                 </div>
-              )}
+                <div className="text-sm text-muted-foreground">JSON/XML Conversion</div>
+              </div>
+              <div className="p-3 bg-purple-50 rounded-md">
+                <div className="text-lg font-semibold text-purple-600">
+                  {result.medicalDocument?.pdfBase64 ? '✓' : '✗'}
+                </div>
+                <div className="text-sm text-muted-foreground">PDF Generation</div>
+              </div>
+              <div className="p-3 bg-green-50 rounded-md">
+                <div className="text-lg font-semibold text-green-600">
+                  {saveSuccess ? '✓' : '✗'}
+                </div>
+                <div className="text-sm text-muted-foreground">Database Save</div>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -650,9 +596,9 @@ OBX|1|NM|2093-3^Cholesterol Total^LN||200|mg/dL|<200||||F|||20230101120000`;
           <DialogHeader>
             <DialogTitle>Medical Document Preview</DialogTitle>
           </DialogHeader>
-          {result?.medicalDocument?.pdfBase64 && (
+          {pdfBlobUrl && (
             <iframe
-              src={`data:application/pdf;base64,${result.medicalDocument.pdfBase64}`}
+              src={pdfBlobUrl}
               className="w-full h-full"
               title="PDF Preview"
             />

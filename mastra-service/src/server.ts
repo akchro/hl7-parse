@@ -1,8 +1,9 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { HL7MedicalDocumentAgent } from './hl7-medical-agent-html.js';
+import { triageAgent } from './agents/hl7-agent.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -27,12 +28,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', service: 'mastra-hl7-service' });
 });
 
 // HL7 conversion endpoint - both formats
-app.post('/convert-hl7', async (req, res) => {
+app.post('/convert-hl7', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -137,7 +138,7 @@ Return only valid XML without any markdown formatting or additional text.
 });
 
 // JSON-only conversion endpoint
-app.post('/convert-hl7/json', async (req, res) => {
+app.post('/convert-hl7/json', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -201,7 +202,7 @@ Return only valid JSON without any markdown formatting or additional text.
 });
 
 // XML-only conversion endpoint
-app.post('/convert-hl7/xml', async (req, res) => {
+app.post('/convert-hl7/xml', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -262,7 +263,7 @@ if (!fs.existsSync(outputDir)) {
 }
 
 // HL7 to Plain English endpoint
-app.post('/convert-hl7/plain-english', async (req, res) => {
+app.post('/convert-hl7/plain-english', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -292,7 +293,7 @@ app.post('/convert-hl7/plain-english', async (req, res) => {
 });
 
 // HL7 to LaTeX endpoint
-app.post('/convert-hl7/latex', async (req, res) => {
+app.post('/convert-hl7/latex', async (req: Request, res: Response) => {
   try {
     const { hl7Content } = req.body;
 
@@ -324,7 +325,7 @@ app.post('/convert-hl7/latex', async (req, res) => {
 });
 
 // HL7 to Medical Document (PDF) endpoint
-app.post('/convert-hl7/medical-document', async (req, res) => {
+app.post('/convert-hl7/medical-document', async (req: Request, res: Response) => {
   try {
     const { hl7Content, generatePdf = false, format = 'both' } = req.body;
 
@@ -374,7 +375,7 @@ app.post('/convert-hl7/medical-document', async (req, res) => {
 });
 
 // Endpoint to download generated PDF files
-app.get('/download/pdf/:filename', (req, res) => {
+app.get('/download/pdf/:filename', (req: Request, res: Response) => {
   const { filename } = req.params;
   const filePath = path.join(outputDir, filename);
 
@@ -387,6 +388,119 @@ app.get('/download/pdf/:filename', (req, res) => {
   res.download(filePath, filename);
 });
 
+// Medical Triage Analysis endpoint
+app.post('/triage-analysis', async (req: Request, res: Response) => {
+  try {
+    const { hl7Messages, hl7_messages, patientCount, patient_count } = req.body;
+    const messages = hl7Messages || hl7_messages;
+    const count = patientCount || patient_count;
+
+    if (!messages || !Array.isArray(messages)) {
+      return res.status(400).json({
+        error: 'hl7Messages array is required in request body',
+      });
+    }
+
+    if (messages.length === 0) {
+      return res.status(400).json({
+        error: 'At least one HL7 message is required for triage analysis',
+      });
+    }
+
+    console.log(`Processing triage analysis for ${messages.length} patients...`);
+
+    // Create a comprehensive prompt for triage analysis
+    const triagePrompt = `
+Analyze the following HL7 messages for medical triage purposes. For each patient, provide a severity score (1-100) based on clinical urgency and standardized triage protocols.
+
+HL7 Messages to analyze:
+${messages.map((hl7, index) => `
+--- Patient ${index + 1} ---
+${hl7}
+`).join('\n')}
+
+For each patient, analyze:
+1. Vital signs and clinical indicators
+2. Chief complaints and symptoms
+3. Medical history and comorbidities
+4. Age and demographic factors
+5. Urgency of care needed
+
+Provide your assessment in the following JSON format:
+{
+  "results": [
+    {
+      "patient_id": "extracted_patient_id",
+      "patient_name": "extracted_patient_name",
+      "severity_score": 85,
+      "priority_level": "Emergent",
+      "clinical_summary": "Brief summary of patient condition",
+      "key_findings": ["finding1", "finding2"],
+      "recommended_timeline": "Immediate/Within 15 minutes/Within 1 hour/Within 2-4 hours/Routine",
+      "reasoning": "Clinical reasoning for the severity score"
+    }
+  ]
+}
+
+Remember:
+- Score 90-100: Immediate/Resuscitation
+- Score 80-89: Emergent  
+- Score 70-79: Urgent
+- Score 60-69: Less Urgent
+- Score 50-59: Non-urgent
+- Score 1-49: Delayed care
+
+Return only valid JSON without markdown formatting.`;
+
+    // Process triage analysis with Gemini
+    const response = await triageAgent.run(triagePrompt);
+    
+    // Try to parse the JSON response
+    let triageResults;
+    try {
+      triageResults = JSON.parse(response);
+    } catch (parseError) {
+      console.error('Failed to parse triage response:', parseError);
+      // Try to extract JSON from response if it contains extra text
+      const jsonMatch = response.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        try {
+          triageResults = JSON.parse(jsonMatch[0]);
+        } catch (retryError) {
+          throw new Error('Invalid JSON response from triage agent');
+        }
+      } else {
+        throw new Error('No valid JSON found in triage response');
+      }
+    }
+
+    // Validate response structure
+    if (!triageResults.results || !Array.isArray(triageResults.results)) {
+      throw new Error('Invalid triage response structure');
+    }
+
+    // Sort results by severity score (highest first)
+    triageResults.results.sort((a: { severity_score: number }, b: { severity_score: number }) => b.severity_score - a.severity_score);
+
+    res.json({
+      success: true,
+      data: triageResults.results,
+      metadata: {
+        patientsAnalyzed: triageResults.results.length,
+        timestamp: new Date().toISOString(),
+        triageProtocols: ['ESI', 'CTAS', 'MTS']
+      }
+    });
+
+  } catch (error) {
+    console.error('Error processing triage analysis:', error);
+    res.status(500).json({
+      error: 'Internal server error during triage analysis',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`Mastra HL7 Service running on port ${PORT}`);
@@ -395,6 +509,7 @@ app.listen(PORT, () => {
   console.log(`HL7 to Plain English: http://localhost:${PORT}/convert-hl7/plain-english`);
   console.log(`HL7 to LaTeX: http://localhost:${PORT}/convert-hl7/latex`);
   console.log(`HL7 to Medical Document: http://localhost:${PORT}/convert-hl7/medical-document`);
+  console.log(`Medical Triage Analysis: http://localhost:${PORT}/triage-analysis`);
 });
 
 export default app;
