@@ -325,7 +325,7 @@ export default function ProblemPage() {
               There's a Better Way to Manage Healthcare Data
             </h2>
             <p className="text-muted-foreground text-xl mb-8 max-w-2xl mx-auto">
-              HL7 LiteBoard bridges the gap between technical standards and clinical needs, 
+              Prism bridges the gap between technical standards and clinical needs, 
               transforming complex data into actionable information.
             </p>
             <div className="flex flex-wrap gap-4 justify-center">

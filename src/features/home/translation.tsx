@@ -286,7 +286,7 @@ PV1|1|I|ICU^ room 101|||||||||||||||||||||||||||||||||202401200800`}
               Explore More Features
             </motion.h2>
             <motion.p variants={fadeUp} className="text-muted-foreground text-lg mb-8">
-              Discover how HL7 LiteBoard's complete suite of tools can transform your healthcare workflow.
+              Discover how Prism's complete suite of tools can transform your healthcare workflow.
             </motion.p>
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 justify-center">
               <Button variant="outline" asChild>

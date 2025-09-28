@@ -80,7 +80,7 @@ export default function SolutionPage() {
       step: '1',
       title: 'Connect',
       description:
-        'HL7 LiteBoard integrates with your existing hospital systems and begins ingesting messages immediately.',
+        'Prism integrates with your existing hospital systems and begins ingesting messages immediately.',
     },
     {
       step: '2',
@@ -144,13 +144,13 @@ export default function SolutionPage() {
           >
             <div className='bg-primary/10 text-primary mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm'>
               <Zap className='h-4 w-4' />
-              The HL7 LiteBoard Solution
+              The Prism Solution
             </div>
             <h1 className='mb-6 text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl'>
               Healthcare Data, <span className='text-primary'>Humanized</span>
             </h1>
             <p className='text-muted-foreground mb-8 text-xl'>
-              HL7 LiteBoard acts as a translation layer between complex
+              Prism acts as a translation layer between complex
               technical standards and clinical workflows, giving healthcare
               professionals the simplicity they need without sacrificing
               interoperability.
@@ -176,7 +176,7 @@ export default function SolutionPage() {
               <span className='text-primary'>Four Transformations</span>
             </h2>
             <p className='text-muted-foreground mx-auto max-w-2xl text-xl'>
-              HL7 LiteBoard simplifies healthcare data management through
+              Prism simplifies healthcare data management through
               focused, powerful features
             </p>
           </div>
@@ -271,7 +271,7 @@ export default function SolutionPage() {
                     <span className='text-primary'>Tangible</span>
                   </h2>
                   <p className='text-muted-foreground mb-6 text-lg'>
-                    HL7 LiteBoard transforms pipe-delimited messages into clean,
+                    Prism transforms pipe-delimited messages into clean,
                     organized patient records that clinical staff can actually
                     use and understand.
                   </p>
@@ -322,7 +322,7 @@ export default function SolutionPage() {
               Immediate <span className='text-primary'>Benefits</span>
             </h2>
             <p className='text-muted-foreground text-xl'>
-              What healthcare organizations gain with HL7 LiteBoard
+              What healthcare organizations gain with Prism
             </p>
           </div>
 

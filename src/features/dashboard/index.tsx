@@ -58,7 +58,7 @@ export default function HL7Dashboard() {
             transition={{ duration: 0.6 }}
             className="text-center space-y-4"
           >
-            <h1 className="text-4xl font-bold tracking-tight">HL7 LiteBoard</h1>
+            <h1 className="text-4xl font-bold tracking-tight">Prism</h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
               Streamline HL7 data processing for clinical workflows
             </p>

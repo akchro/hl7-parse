@@ -53,7 +53,7 @@ export function Navbar() {
             <Heart className="w-5 h-5 text-white" />
           </div>
           <Link to="/" className="flex-shrink-0 font-bold text-xl text-blue-600">
-            HL7 LiteBoard
+            Prism
           </Link>
         </div>
 

@@ -101,7 +101,7 @@ export default function HL7Dashboard() {
           {/* Header Section */}
           <motion.div variants={itemVariants} className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">HL7 LiteBoard</h1>
+              <h1 className="text-3xl font-bold tracking-tight">Prism LiteBoard</h1>
               <p className="text-muted-foreground">
                 Streamline HL7 data processing for clinical workflows
               </p>
