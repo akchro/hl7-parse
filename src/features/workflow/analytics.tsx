@@ -125,15 +125,27 @@ export function Analytics() {
   ) => {
     if (!editedConversion) return
 
-    setEditedConversion({
-      ...editedConversion,
-      ...(format === 'hl7' && { original_hl7_content: content }),
-      ...(format === 'json' && {
-        json_content: content ? JSON.parse(content) : null,
-      }),
-      ...(format === 'xml' && { xml_content: content }),
-      ...(format === 'plain' && { plain_english: content }),
-    })
+    try {
+      setEditedConversion({
+        ...editedConversion,
+        ...(format === 'hl7' && { original_hl7_content: content }),
+        ...(format === 'json' && {
+          json_content: content ? JSON.parse(content) : null,
+        }),
+        ...(format === 'xml' && { xml_content: content }),
+        ...(format === 'plain' && { plain_english: content }),
+      })
+      
+      // Clear error when content is successfully updated
+      if (format === 'json' && content) {
+        setError(null)
+      }
+    } catch (err) {
+      if (format === 'json') {
+        setError('Invalid JSON format. Please check your JSON syntax.')
+        console.error('JSON parsing error:', err)
+      }
+    }
   }
 
   const handleSave = async () => {
@@ -151,18 +163,21 @@ export function Analytics() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            hl7_content: editedConversion.original_hl7_content,
             title: editedConversion.title,
             description: editedConversion.description,
-            original_hl7_content: editedConversion.original_hl7_content,
             json_content: editedConversion.json_content,
             xml_content: editedConversion.xml_content,
             plain_english: editedConversion.plain_english,
+            conversion_metadata: editedConversion.conversion_metadata,
+            user_id: editedConversion.user_id,
           }),
         }
       )
 
       if (!response.ok) {
-        throw new Error('Failed to update conversion')
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+        throw new Error(errorData.detail || errorData.message || `Failed to update conversion (${response.status})`)
       }
 
       const updatedConversion = await response.json()
@@ -180,7 +195,7 @@ export function Analytics() {
 
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
-      setError('Failed to save changes')
+      setError(err instanceof Error ? err.message : 'Failed to save changes')
       console.error('Error saving conversion:', err)
     } finally {
       setIsSaving(false)
